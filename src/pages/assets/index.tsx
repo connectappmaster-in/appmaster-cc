@@ -44,7 +44,7 @@ const Assets = () => {
     try {
       const { data, error } = await supabase
         .from('assets')
-        .select('*, profiles(full_name, email)')
+        .select('*, assigned_user:profiles!assigned_to(full_name, email)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -292,7 +292,7 @@ const Assets = () => {
                     <TableCell>{asset.model}</TableCell>
                     <TableCell>{asset.category}</TableCell>
                     <TableCell>{asset.department || '-'}</TableCell>
-                    <TableCell>{asset.profiles?.full_name || '-'}</TableCell>
+                    <TableCell>{asset.assigned_user?.full_name || '-'}</TableCell>
                     <TableCell>{getStatusBadge(asset.status)}</TableCell>
                     <TableCell>
                       {asset.purchase_date ? format(new Date(asset.purchase_date), 'dd/MM/yyyy') : '-'}
