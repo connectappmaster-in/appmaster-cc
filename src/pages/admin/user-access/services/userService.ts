@@ -37,14 +37,7 @@ class UserService {
   async getUsers(): Promise<UserProfile[]> {
     const { data, error } = await supabase
       .from('profiles')
-      .select(`
-        *,
-        tech_lead:tech_lead_id (
-          user_id,
-          full_name,
-          email
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) {
