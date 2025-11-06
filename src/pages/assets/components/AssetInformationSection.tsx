@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Save } from "lucide-react";
+import { Save, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import FormInput from "@/components/common/FormInput";
 import FormSelect from "@/components/common/FormSelect";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 
 interface AssetInformationSectionProps {
@@ -53,7 +54,11 @@ export function AssetInformationSection({ assetId, assetData, onSuccess }: Asset
   const { toast } = useToast();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
+    name: '',
     asset_tag: '',
     category: '',
     brand: '',
@@ -77,6 +82,7 @@ export function AssetInformationSection({ assetId, assetData, onSuccess }: Asset
   useEffect(() => {
     if (assetData) {
       setFormData({
+        name: assetData.name || '',
         asset_tag: assetData.asset_tag || '',
         category: assetData.category || '',
         brand: assetData.brand || '',
@@ -96,16 +102,63 @@ export function AssetInformationSection({ assetId, assetData, onSuccess }: Asset
         assigned_to: assetData.assigned_to || '',
         asset_photo: assetData.asset_photo || ''
       });
+      if (assetData.asset_photo) {
+        setImagePreview(assetData.asset_photo);
+      }
     }
   }, [assetData]);
 
   const showHardwareFields = ['Laptop', 'Desktop', 'Server'].includes(formData.category);
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!imageFile) return formData.asset_photo || null;
+
+    setUploading(true);
+    try {
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('asset-images')
+        .upload(filePath, imageFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('asset-images')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error: any) {
+      toast({
+        title: "Image Upload Error",
+        description: error.message,
+        variant: "destructive"
+      });
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
-    if (!formData.category || !formData.brand || !formData.model) {
+    if (!formData.name || !formData.category || !formData.brand || !formData.model) {
       toast({
         title: "Validation Error",
-        description: "Category, Brand, and Model are required fields.",
+        description: "Name, Category, Brand, and Model are required fields.",
         variant: "destructive"
       });
       return;
@@ -113,10 +166,14 @@ export function AssetInformationSection({ assetId, assetData, onSuccess }: Asset
 
     setLoading(true);
     try {
+      // Upload image if there's a new one
+      const imageUrl = await uploadImage();
+
       const payload: any = {
         ...formData,
         cost: formData.cost ? parseFloat(formData.cost) : null,
         assigned_to: formData.assigned_to || null,
+        asset_photo: imageUrl,
         created_by: user?.id
       };
 
@@ -182,6 +239,14 @@ export function AssetInformationSection({ assetId, assetData, onSuccess }: Asset
       </div>
 
       <div className="grid grid-cols-2 gap-4">
+        <FormInput
+          id="name"
+          label="Asset Name"
+          value={formData.name}
+          onChange={(value) => setFormData({ ...formData, name: value })}
+          placeholder="e.g., Laptop for Engineering Team"
+          required
+        />
         <FormInput
           id="asset_tag"
           label="Asset Tag ID"
@@ -305,9 +370,50 @@ export function AssetInformationSection({ assetId, assetData, onSuccess }: Asset
         />
       </div>
 
-      <Button onClick={handleSave} disabled={loading} className="w-full">
+      <div className="space-y-2">
+        <Label htmlFor="asset_image">Add Image</Label>
+        <div className="space-y-4">
+          {imagePreview && (
+            <div className="relative w-full h-48 border rounded-lg overflow-hidden">
+              <img 
+                src={imagePreview} 
+                alt="Asset preview" 
+                className="w-full h-full object-cover"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2"
+                onClick={() => {
+                  setImageFile(null);
+                  setImagePreview(null);
+                  setFormData({ ...formData, asset_photo: '' });
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <Input
+              id="asset_image"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="flex-1"
+            />
+            <Upload className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Upload JPG, PNG, or GIF. Max file size: 5MB
+          </p>
+        </div>
+      </div>
+
+      <Button onClick={handleSave} disabled={loading || uploading} className="w-full">
         <Save className="mr-2 h-4 w-4" />
-        {loading ? 'Saving...' : assetId ? 'Update Asset' : 'Create Asset'}
+        {loading || uploading ? 'Saving...' : assetId ? 'Update Asset' : 'Create Asset'}
       </Button>
     </div>
   );
