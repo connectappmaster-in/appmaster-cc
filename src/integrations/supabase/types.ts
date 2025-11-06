@@ -14,57 +14,219 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          description: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          metadata: Json | null
+          performed_by: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          description?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          metadata?: Json | null
+          performed_by: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          description?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          performed_by?: string
+        }
+        Relationships: []
+      }
+      asset_allocations: {
+        Row: {
+          asset_id: string
+          created_at: string
+          created_by: string
+          department: string | null
+          id: string
+          remarks: string | null
+          status: string
+          transaction_date: string
+          transaction_type: string
+          user_id: string | null
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          created_by: string
+          department?: string | null
+          id?: string
+          remarks?: string | null
+          status?: string
+          transaction_date?: string
+          transaction_type: string
+          user_id?: string | null
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          created_by?: string
+          department?: string | null
+          id?: string
+          remarks?: string | null
+          status?: string
+          transaction_date?: string
+          transaction_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_allocations_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_allocations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      asset_software_links: {
+        Row: {
+          asset_id: string
+          assigned_date: string
+          created_at: string
+          created_by: string
+          id: string
+          license_id: string
+        }
+        Insert: {
+          asset_id: string
+          assigned_date?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          license_id: string
+        }
+        Update: {
+          asset_id?: string
+          assigned_date?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          license_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_software_links_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_software_links_license_id_fkey"
+            columns: ["license_id"]
+            isOneToOne: false
+            referencedRelation: "licenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assets: {
         Row: {
+          asset_photo: string | null
           asset_tag: string
           assigned_to: string | null
           brand: string | null
+          category: string | null
+          confidentiality_level: string | null
+          cost: number | null
           created_at: string
           created_by: string
+          department: string | null
+          description: string | null
           id: string
           location: string | null
           model: string | null
           name: string
           notes: string | null
+          processor: string | null
           purchase_date: string | null
+          purchased_from: string | null
+          ram: string | null
           serial_number: string | null
+          site: string | null
           status: string
+          storage: string | null
           type: string
           updated_at: string
           warranty_expiry: string | null
         }
         Insert: {
+          asset_photo?: string | null
           asset_tag: string
           assigned_to?: string | null
           brand?: string | null
+          category?: string | null
+          confidentiality_level?: string | null
+          cost?: number | null
           created_at?: string
           created_by: string
+          department?: string | null
+          description?: string | null
           id?: string
           location?: string | null
           model?: string | null
           name: string
           notes?: string | null
+          processor?: string | null
           purchase_date?: string | null
+          purchased_from?: string | null
+          ram?: string | null
           serial_number?: string | null
+          site?: string | null
           status?: string
+          storage?: string | null
           type: string
           updated_at?: string
           warranty_expiry?: string | null
         }
         Update: {
+          asset_photo?: string | null
           asset_tag?: string
           assigned_to?: string | null
           brand?: string | null
+          category?: string | null
+          confidentiality_level?: string | null
+          cost?: number | null
           created_at?: string
           created_by?: string
+          department?: string | null
+          description?: string | null
           id?: string
           location?: string | null
           model?: string | null
           name?: string
           notes?: string | null
+          processor?: string | null
           purchase_date?: string | null
+          purchased_from?: string | null
+          ram?: string | null
           serial_number?: string | null
+          site?: string | null
           status?: string
+          storage?: string | null
           type?: string
           updated_at?: string
           warranty_expiry?: string | null
@@ -234,6 +396,57 @@ export type Database = {
           log_level?: string
           operation_type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      licenses: {
+        Row: {
+          cost: number | null
+          created_at: string
+          created_by: string
+          expiry_date: string | null
+          id: string
+          license_key: string | null
+          notes: string | null
+          purchase_date: string | null
+          renewal_status: string | null
+          seats_total: number | null
+          seats_used: number | null
+          software_name: string
+          updated_at: string
+          vendor: string
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          created_by: string
+          expiry_date?: string | null
+          id?: string
+          license_key?: string | null
+          notes?: string | null
+          purchase_date?: string | null
+          renewal_status?: string | null
+          seats_total?: number | null
+          seats_used?: number | null
+          software_name: string
+          updated_at?: string
+          vendor: string
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string
+          created_by?: string
+          expiry_date?: string | null
+          id?: string
+          license_key?: string | null
+          notes?: string | null
+          purchase_date?: string | null
+          renewal_status?: string | null
+          seats_total?: number | null
+          seats_used?: number | null
+          software_name?: string
+          updated_at?: string
+          vendor?: string
         }
         Relationships: []
       }
@@ -681,6 +894,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      warranties: {
+        Row: {
+          asset_id: string
+          attachment_url: string | null
+          coverage_notes: string | null
+          created_at: string
+          created_by: string
+          expiry_date: string
+          id: string
+          renewal_status: string
+          start_date: string
+          updated_at: string
+          vendor: string
+        }
+        Insert: {
+          asset_id: string
+          attachment_url?: string | null
+          coverage_notes?: string | null
+          created_at?: string
+          created_by: string
+          expiry_date: string
+          id?: string
+          renewal_status?: string
+          start_date: string
+          updated_at?: string
+          vendor: string
+        }
+        Update: {
+          asset_id?: string
+          attachment_url?: string | null
+          coverage_notes?: string | null
+          created_at?: string
+          created_by?: string
+          expiry_date?: string
+          id?: string
+          renewal_status?: string
+          start_date?: string
+          updated_at?: string
+          vendor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warranties_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
