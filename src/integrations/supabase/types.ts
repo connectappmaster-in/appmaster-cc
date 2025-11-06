@@ -14,311 +14,733 @@ export type Database = {
   }
   public: {
     Tables: {
-      claim_documents: {
+      assets: {
         Row: {
-          claim_id: string
-          file_name: string
-          file_path: string
-          file_size: number | null
-          id: string
-          mime_type: string | null
-          uploaded_at: string
-        }
-        Insert: {
-          claim_id: string
-          file_name: string
-          file_path: string
-          file_size?: number | null
-          id?: string
-          mime_type?: string | null
-          uploaded_at?: string
-        }
-        Update: {
-          claim_id?: string
-          file_name?: string
-          file_path?: string
-          file_size?: number | null
-          id?: string
-          mime_type?: string | null
-          uploaded_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "claim_documents_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "claims"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      claims: {
-        Row: {
-          claim_amount: number
-          claim_date: string
-          claim_number: string
-          claim_status: string
+          asset_tag: string
+          assigned_to: string | null
+          brand: string | null
           created_at: string
-          description: string | null
+          created_by: string
           id: string
+          location: string | null
+          model: string | null
+          name: string
           notes: string | null
-          policy_id: string
+          purchase_date: string | null
+          serial_number: string | null
+          status: string
+          type: string
           updated_at: string
-          user_id: string
+          warranty_expiry: string | null
         }
         Insert: {
-          claim_amount: number
-          claim_date: string
-          claim_number: string
-          claim_status?: string
+          asset_tag: string
+          assigned_to?: string | null
+          brand?: string | null
           created_at?: string
-          description?: string | null
+          created_by: string
           id?: string
+          location?: string | null
+          model?: string | null
+          name: string
           notes?: string | null
-          policy_id: string
+          purchase_date?: string | null
+          serial_number?: string | null
+          status?: string
+          type: string
           updated_at?: string
-          user_id: string
+          warranty_expiry?: string | null
         }
         Update: {
-          claim_amount?: number
-          claim_date?: string
-          claim_number?: string
-          claim_status?: string
+          asset_tag?: string
+          assigned_to?: string | null
+          brand?: string | null
           created_at?: string
-          description?: string | null
+          created_by?: string
           id?: string
+          location?: string | null
+          model?: string | null
+          name?: string
           notes?: string | null
-          policy_id?: string
+          purchase_date?: string | null
+          serial_number?: string | null
+          status?: string
+          type?: string
           updated_at?: string
-          user_id?: string
+          warranty_expiry?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "claims_policy_id_fkey"
-            columns: ["policy_id"]
+            foreignKeyName: "assets_assigned_to_fkey"
+            columns: ["assigned_to"]
             isOneToOne: false
-            referencedRelation: "insurance_policies"
-            referencedColumns: ["id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "assets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
-      global_logs: {
+      backup_history: {
         Row: {
-          action: string
+          backup_name: string
+          backup_type: string
           created_at: string
-          description: string
-          entity_id: string | null
-          entity_type: string | null
+          created_by: string
+          file_size: number
           id: string
           metadata: Json | null
+          record_count: number
+          storage_path: string | null
+          table_count: number
+        }
+        Insert: {
+          backup_name: string
+          backup_type: string
+          created_at?: string
+          created_by: string
+          file_size: number
+          id?: string
+          metadata?: Json | null
+          record_count: number
+          storage_path?: string | null
+          table_count: number
+        }
+        Update: {
+          backup_name?: string
+          backup_type?: string
+          created_at?: string
+          created_by?: string
+          file_size?: number
+          id?: string
+          metadata?: Json | null
+          record_count?: number
+          storage_path?: string | null
+          table_count?: number
+        }
+        Relationships: []
+      }
+      compliance: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          check_name: string
+          checked_by: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          findings: string | null
+          id: string
+          last_checked: string | null
+          next_check_due: string | null
+          remediation_plan: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category: string
+          check_name: string
+          checked_by?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          findings?: string | null
+          id?: string
+          last_checked?: string | null
+          next_check_due?: string | null
+          remediation_plan?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          check_name?: string
+          checked_by?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          findings?: string | null
+          id?: string
+          last_checked?: string | null
+          next_check_due?: string | null
+          remediation_plan?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "compliance_checked_by_fkey"
+            columns: ["checked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "compliance_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      import_export_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity_name: string
+          entity_type: string
+          id: string
+          log_level: string
+          operation_type: string
           user_id: string
         }
         Insert: {
           action: string
           created_at?: string
-          description: string
-          entity_id?: string | null
-          entity_type?: string | null
+          details?: Json | null
+          entity_name: string
+          entity_type: string
           id?: string
-          metadata?: Json | null
+          log_level: string
+          operation_type: string
           user_id: string
         }
         Update: {
           action?: string
           created_at?: string
-          description?: string
-          entity_id?: string | null
-          entity_type?: string | null
+          details?: Json | null
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          log_level?: string
+          operation_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      monitoring: {
+        Row: {
+          acknowledged: boolean
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_message: string | null
+          alert_triggered: boolean
+          created_at: string
+          id: string
+          metadata: Json | null
+          metric_name: string
+          metric_value: number
+          resolved: boolean
+          resolved_at: string | null
+          service_name: string
+          status: string
+          threshold_value: number | null
+        }
+        Insert: {
+          acknowledged?: boolean
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_message?: string | null
+          alert_triggered?: boolean
+          created_at?: string
           id?: string
           metadata?: Json | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      insurance_policies: {
-        Row: {
-          agent_email: string | null
-          agent_name: string | null
-          agent_phone: string | null
-          coverage_amount: number | null
-          created_at: string
-          expiry_date: string
-          id: string
-          insured_name: string
-          insurer_name: string
-          notes: string | null
-          policy_number: string
-          policy_type: string
-          premium_amount: number
-          start_date: string
-          status: string
-          updated_at: string
-          user_id: string
-          vehicle_details: string | null
-        }
-        Insert: {
-          agent_email?: string | null
-          agent_name?: string | null
-          agent_phone?: string | null
-          coverage_amount?: number | null
-          created_at?: string
-          expiry_date: string
-          id?: string
-          insured_name: string
-          insurer_name: string
-          notes?: string | null
-          policy_number: string
-          policy_type: string
-          premium_amount: number
-          start_date: string
+          metric_name: string
+          metric_value: number
+          resolved?: boolean
+          resolved_at?: string | null
+          service_name: string
           status?: string
-          updated_at?: string
-          user_id: string
-          vehicle_details?: string | null
+          threshold_value?: number | null
         }
         Update: {
-          agent_email?: string | null
-          agent_name?: string | null
-          agent_phone?: string | null
-          coverage_amount?: number | null
+          acknowledged?: boolean
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_message?: string | null
+          alert_triggered?: boolean
           created_at?: string
-          expiry_date?: string
           id?: string
-          insured_name?: string
-          insurer_name?: string
-          notes?: string | null
-          policy_number?: string
-          policy_type?: string
-          premium_amount?: number
-          start_date?: string
+          metadata?: Json | null
+          metric_name?: string
+          metric_value?: number
+          resolved?: boolean
+          resolved_at?: string | null
+          service_name?: string
           status?: string
-          updated_at?: string
-          user_id?: string
-          vehicle_details?: string | null
-        }
-        Relationships: []
-      }
-      policy_documents: {
-        Row: {
-          file_name: string
-          file_path: string
-          file_size: number | null
-          id: string
-          mime_type: string | null
-          policy_id: string
-          uploaded_at: string
-        }
-        Insert: {
-          file_name: string
-          file_path: string
-          file_size?: number | null
-          id?: string
-          mime_type?: string | null
-          policy_id: string
-          uploaded_at?: string
-        }
-        Update: {
-          file_name?: string
-          file_path?: string
-          file_size?: number | null
-          id?: string
-          mime_type?: string | null
-          policy_id?: string
-          uploaded_at?: string
+          threshold_value?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "policy_documents_policy_id_fkey"
-            columns: ["policy_id"]
+            foreignKeyName: "monitoring_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
             isOneToOne: false
-            referencedRelation: "insurance_policies"
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          performed_by: string | null
+          read: boolean
+          related_record_id: string | null
+          related_record_route: string | null
+          related_record_type: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          performed_by?: string | null
+          read?: boolean
+          related_record_id?: string | null
+          related_record_route?: string | null
+          related_record_type?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          performed_by?: string | null
+          read?: boolean
+          related_record_id?: string | null
+          related_record_route?: string | null
+          related_record_type?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      page_access: {
+        Row: {
+          has_access: boolean
+          id: string
+          page_id: string
+          role_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          has_access?: boolean
+          id?: string
+          page_id: string
+          role_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          has_access?: boolean
+          id?: string
+          page_id?: string
+          role_name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_access_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
             referencedColumns: ["id"]
           },
         ]
+      }
+      pages: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          route: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          route: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          route?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      password_change_logs: {
+        Row: {
+          changed_by_id: string
+          changed_by_username: string
+          created_at: string
+          id: string
+          trigger_type: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          changed_by_id: string
+          changed_by_username: string
+          created_at?: string
+          id?: string
+          trigger_type: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          changed_by_id?: string
+          changed_by_username?: string
+          created_at?: string
+          id?: string
+          trigger_type?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
           created_at: string
-          email: string | null
-          full_name: string | null
+          department: string | null
+          email: string
+          full_name: string
           id: string
-          phone: string | null
-          role: Database["public"]["Enums"]["user_role"]
+          last_login: string | null
+          role: string
+          status: string | null
+          tech_lead_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          email?: string | null
-          full_name?: string | null
+          department?: string | null
+          email: string
+          full_name: string
           id?: string
-          phone?: string | null
-          role?: Database["public"]["Enums"]["user_role"]
+          last_login?: string | null
+          role?: string
+          status?: string | null
+          tech_lead_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
-          email?: string | null
-          full_name?: string | null
+          department?: string | null
+          email?: string
+          full_name?: string
           id?: string
-          phone?: string | null
-          role?: Database["public"]["Enums"]["user_role"]
+          last_login?: string | null
+          role?: string
+          status?: string | null
+          tech_lead_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_tech_lead_id_fkey"
+            columns: ["tech_lead_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
-      reminders: {
+      report_logs: {
         Row: {
+          completed_at: string | null
           created_at: string
-          days_before: number
+          error_message: string | null
+          execution_time_ms: number | null
+          file_path: string | null
+          filters: Json | null
+          generated_by: string
           id: string
-          policy_id: string
-          reminder_date: string
-          sent_at: string | null
+          records_processed: number | null
+          report_name: string
+          report_type: string
           status: string
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
-          days_before: number
+          error_message?: string | null
+          execution_time_ms?: number | null
+          file_path?: string | null
+          filters?: Json | null
+          generated_by: string
           id?: string
-          policy_id: string
-          reminder_date: string
-          sent_at?: string | null
+          records_processed?: number | null
+          report_name: string
+          report_type: string
           status?: string
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
-          days_before?: number
+          error_message?: string | null
+          execution_time_ms?: number | null
+          file_path?: string | null
+          filters?: Json | null
+          generated_by?: string
           id?: string
-          policy_id?: string
-          reminder_date?: string
-          sent_at?: string | null
+          records_processed?: number | null
+          report_name?: string
+          report_type?: string
           status?: string
+        }
+        Relationships: []
+      }
+      tickets: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          priority: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          ticket_number: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          priority?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          ticket_number: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          priority?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          ticket_number?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "reminders_policy_id_fkey"
-            columns: ["policy_id"]
+            foreignKeyName: "tickets_assigned_to_fkey"
+            columns: ["assigned_to"]
             isOneToOne: false
-            referencedRelation: "insurance_policies"
-            referencedColumns: ["id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "tickets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "tickets_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
+      }
+      updates: {
+        Row: {
+          affected_systems: string | null
+          completed_date: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          notes: string | null
+          performed_by: string | null
+          scheduled_date: string | null
+          severity: string
+          status: string
+          title: string
+          update_type: string
+          updated_at: string
+        }
+        Insert: {
+          affected_systems?: string | null
+          completed_date?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          performed_by?: string | null
+          scheduled_date?: string | null
+          severity?: string
+          status?: string
+          title: string
+          update_type: string
+          updated_at?: string
+        }
+        Update: {
+          affected_systems?: string | null
+          completed_date?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          performed_by?: string | null
+          scheduled_date?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          update_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "updates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "updates_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: Database["public"]["Enums"]["user_role"]
+      calculate_goal_progress: {
+        Args: { current_rating_param: string; target_rating_param: string }
+        Returns: number
       }
+      calculate_next_upgrade_date: {
+        Args: { approved_at_param: string }
+        Returns: string
+      }
+      can_upgrade_rating: {
+        Args: {
+          approved_at_param: string
+          current_rating_param: string
+          current_status_param: string
+          target_rating_param: string
+        }
+        Returns: boolean
+      }
+      cleanup_old_notifications: { Args: never; Returns: undefined }
+      generate_ticket_number: { Args: never; Returns: string }
+      get_current_user_role: { Args: never; Returns: string }
+      get_my_tech_lead_id: { Args: never; Returns: string }
+      get_user_available_capacity: {
+        Args: { user_id_param: string }
+        Returns: number
+      }
+      get_user_total_allocation: {
+        Args: { user_id_param: string }
+        Returns: number
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_project_teammate: {
+        Args: { _target_user_id: string }
+        Returns: boolean
+      }
+      send_goal_reminders: { Args: never; Returns: undefined }
+      test_employee_rating_insert: {
+        Args: {
+          p_rating: string
+          p_skill_id: string
+          p_subskill_id: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      update_leaderboard_history: { Args: never; Returns: undefined }
     }
     Enums: {
-      user_role: "admin" | "super_admin"
+      app_role: "employee" | "tech_lead" | "management" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -446,7 +868,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      user_role: ["admin", "super_admin"],
+      app_role: ["employee", "tech_lead", "management", "admin"],
     },
   },
 } as const
