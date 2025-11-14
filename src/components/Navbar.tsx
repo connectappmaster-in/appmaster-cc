@@ -14,59 +14,59 @@ const productCategories = [
   {
     title: "Finance",
     items: [
-      { name: "Depreciation", path: "/depreciation", icon: TrendingDown },
-      { name: "Invoicing", path: "/invoicing", icon: FileText }
+      { name: "Depreciation", path: "/tools/depreciation", icon: TrendingDown },
+      { name: "Invoicing", path: "/tools/invoicing", icon: FileText }
     ]
   },
   {
     title: "HR",
     items: [
-      { name: "Attendance", path: "/attendance", icon: Clock },
-      { name: "Recruitment", path: "/recruitment", icon: UserPlus }
+      { name: "Attendance", path: "/tools/attendance", icon: Clock },
+      { name: "Recruitment", path: "/tools/recruitment", icon: UserPlus }
     ]
   },
   {
     title: "IT",
     items: [
-      { name: "Tickets Handling", path: "/tickets", icon: Ticket },
-      { name: "Subscriptions", path: "/subscriptions", icon: CreditCard },
-      { name: "Assets", path: "/assets", icon: Laptop }
+      { name: "Tickets Handling", path: "/tools/tickets", icon: Ticket },
+      { name: "Subscriptions", path: "/tools/subscriptions", icon: CreditCard },
+      { name: "Assets", path: "/tools/assets", icon: Laptop }
     ]
   },
   {
     title: "Shop",
     items: [
-      { name: "Income & Expenditure Tracker", path: "/shop-income-expense", icon: Store }
+      { name: "Income & Expenditure Tracker", path: "/tools/shop-income-expense", icon: Store }
     ]
   },
   {
     title: "Manufacturing",
     items: [
-      { name: "Inventory", path: "/inventory", icon: Box }
+      { name: "Inventory", path: "/tools/inventory", icon: Box }
     ]
   },
   {
     title: "Sales",
     items: [
-      { name: "CRM", path: "/crm", icon: Target }
+      { name: "CRM", path: "/tools/crm", icon: Target }
     ]
   },
   {
     title: "Marketing",
     items: [
-      { name: "Marketing", path: "/marketing", icon: CheckCircle }
+      { name: "Marketing", path: "/tools/marketing", icon: CheckCircle }
     ]
   },
   {
     title: "Productivity",
     items: [
-      { name: "Personal Expense Tracker", path: "/personal-expense", icon: CheckCircle }
+      { name: "Personal Expense Tracker", path: "/tools/personal-expense", icon: CheckCircle }
     ]
   },
   {
     title: "Custom",
     items: [
-      { name: "Contact Us", path: "/contact", icon: PhoneCall }
+      { name: "Contact Us", path: "/tools/contact", icon: PhoneCall }
     ]
   }
 ];
