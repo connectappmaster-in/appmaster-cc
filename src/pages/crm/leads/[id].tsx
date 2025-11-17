@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, UserPlus, Briefcase } from 'lucide-react';
+import { ArrowLeft, UserPlus, Briefcase, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import LeadInfoSection from './components/LeadInfoSection';
 import LeadStatusSelector from './components/LeadStatusSelector';
@@ -14,15 +14,17 @@ import LeadScoreMeter from './components/LeadScoreMeter';
 import ActivityTimeline from './components/ActivityTimeline';
 import LeadNotes from './components/LeadNotes';
 import ConvertDialog from './components/ConvertDialog';
+import DeleteDialog from '../opportunities/components/DeleteDialog';
 
 const LeadDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { fetchActivities, activities, updateLead } = useCRMStore();
+  const { fetchActivities, activities, updateLead, deleteLead } = useCRMStore();
   const [lead, setLead] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [convertDialogOpen, setConvertDialogOpen] = useState(false);
   const [convertType, setConvertType] = useState<'customer' | 'opportunity'>('customer');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -75,6 +77,17 @@ const LeadDetailPage = () => {
   const handleConvert = (type: 'customer' | 'opportunity') => {
     setConvertType(type);
     setConvertDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    try {
+      await deleteLead(id);
+      toast.success('Lead deleted successfully');
+      navigate('/crm/leads');
+    } catch (error) {
+      toast.error('Failed to delete lead');
+    }
   };
 
   if (loading) {
@@ -151,6 +164,14 @@ const LeadDetailPage = () => {
               <Briefcase className="h-4 w-4" />
               Convert to Opportunity
             </Button>
+            <Button
+              variant="destructive"
+              onClick={() => setDeleteDialogOpen(true)}
+              className="gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </Button>
           </div>
         </div>
 
@@ -198,6 +219,15 @@ const LeadDetailPage = () => {
         onSuccess={() => {
           navigate(convertType === 'customer' ? '/crm/customers' : '/crm/opportunities');
         }}
+      />
+
+      {/* Delete Dialog */}
+      <DeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Lead"
+        description={`Are you sure you want to delete "${lead.title}"? This action cannot be undone.`}
+        onConfirm={handleDelete}
       />
     </div>
   );

@@ -19,7 +19,9 @@ import LeadsListPage from "./pages/crm/leads";
 import LeadDetailPage from "./pages/crm/leads/[id]";
 import NewLeadPage from "./pages/crm/leads/new";
 import CustomersListPage from "./pages/crm/customers";
+import CustomerDetailPage from "./pages/crm/customers/[id]";
 import OpportunitiesPage from "./pages/crm/opportunities";
+import OpportunityDetailPage from "./pages/crm/opportunities/[id]";
 import QuotesListPage from "./pages/crm/quotes";
 import Marketing from "./pages/marketing";
 import PersonalExpense from "./pages/personal-expense";
@@ -60,7 +62,9 @@ const App = () => (
           <Route path="/crm/leads/new" element={<NewLeadPage />} />
           <Route path="/crm/leads/:id" element={<LeadDetailPage />} />
           <Route path="/crm/customers" element={<CustomersListPage />} />
+          <Route path="/crm/customers/:id" element={<CustomerDetailPage />} />
           <Route path="/crm/opportunities" element={<OpportunitiesPage />} />
+          <Route path="/crm/opportunities/:id" element={<OpportunityDetailPage />} />
           <Route path="/crm/quotes" element={<QuotesListPage />} />
           <Route path="/marketing" element={<Marketing />} />
           <Route path="/personal-expense" element={<PersonalExpense />} />
