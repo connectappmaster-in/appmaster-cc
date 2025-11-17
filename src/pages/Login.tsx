@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import loginBg from "@/assets/login-bg.png";
+import logo from "@/assets/logo.png";
 const Login = () => {
   const navigate = useNavigate();
   const {
@@ -145,7 +146,7 @@ const Login = () => {
           data: {
             full_name: fullName
           },
-          emailRedirectTo: `${window.location.origin}/`
+          emailRedirectTo: `${window.location.origin}/auth/confirm`
         }
       });
       if (error) {
@@ -159,7 +160,7 @@ const Login = () => {
       if (data.user) {
         toast({
           title: "Account created!",
-          description: "You can now sign in with your credentials."
+          description: "Please check your email to verify your account before signing in."
         });
 
         // Clear signup form
@@ -212,19 +213,28 @@ const Login = () => {
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>;
   }
-  return <div className="flex items-center justify-center min-h-screen p-4 relative" style={{
-    backgroundImage: `url(${loginBg})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat'
-  }}>
+  return <div className="flex items-center justify-center min-h-screen p-4 relative">
+      {/* Optimized background image with preload */}
+      <img 
+        src={loginBg} 
+        alt="" 
+        className="absolute inset-0 w-full h-full object-cover"
+        loading="eager"
+        fetchPriority="high"
+        decoding="async"
+      />
       {/* Overlay for better readability */}
       <div className="absolute inset-0 bg-background/40 backdrop-blur-sm"></div>
       
       <Card className="w-full max-w-md relative z-10 border-border/50 bg-background/95 backdrop-blur-md shadow-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">AppMaster</CardTitle>
-          <CardDescription>Sign in to your account or create a new one</CardDescription>
+        <CardHeader className="flex items-center justify-center pb-6">
+          <img 
+            src={logo} 
+            alt="AppMaster Logo" 
+            className="h-16 w-auto"
+            loading="eager"
+            fetchPriority="high"
+          />
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
@@ -267,7 +277,7 @@ const Login = () => {
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Full Name</Label>
-                  <Input id="signup-name" type="text" placeholder="John Doe" value={fullName} onChange={e => setFullName(e.target.value)} required />
+                  <Input id="signup-name" type="text" placeholder="Your Name" value={fullName} onChange={e => setFullName(e.target.value)} required />
                 </div>
 
                 <div className="space-y-2">

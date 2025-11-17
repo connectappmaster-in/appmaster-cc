@@ -43,18 +43,57 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get all users with their roles
-    const { data: profiles, error } = await supabase
+    // Create admin client for accessing auth.users
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    );
+
+    // Get all auth users with status
+    const { data: authUsers, error: authUsersError } = await supabaseAdmin.auth.admin.listUsers();
+    if (authUsersError) throw authUsersError;
+
+    // Get all profiles
+    const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select(`
-        *,
-        user_roles(role)
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (profilesError) throw profilesError;
 
-    return new Response(JSON.stringify(profiles), {
+    // Get all user roles
+    const { data: userRoles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('user_id, role');
+
+    if (rolesError) throw rolesError;
+
+    // Merge profiles with their roles and auth status
+    const profilesWithRoles = profiles?.map(profile => {
+      const userRole = userRoles?.find(ur => ur.user_id === profile.id);
+      const authUser = authUsers.users.find(u => u.id === profile.id);
+      
+      // Determine status based on email confirmation and ban status
+      let status = 'pending';
+      if (authUser) {
+        if (authUser.email_confirmed_at) {
+          status = 'active';
+        }
+        // Check if user is banned (if ban_duration exists in metadata or other field)
+        if (authUser.user_metadata?.banned) {
+          status = 'banned';
+        }
+      }
+      
+      return {
+        ...profile,
+        role: userRole?.role || 'user',
+        status,
+        last_login: authUser?.last_sign_in_at || null,
+      };
+    });
+
+    return new Response(JSON.stringify(profilesWithRoles), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

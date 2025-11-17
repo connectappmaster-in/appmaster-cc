@@ -14,59 +14,59 @@ const productCategories = [
   {
     title: "Finance",
     items: [
-      { name: "Depreciation", path: "/tools/depreciation", icon: TrendingDown },
-      { name: "Invoicing", path: "/tools/invoicing", icon: FileText }
+      { name: "Depreciation", path: "/depreciation", icon: TrendingDown },
+      { name: "Invoicing", path: "/invoicing", icon: FileText }
     ]
   },
   {
     title: "HR",
     items: [
-      { name: "Attendance", path: "/tools/attendance", icon: Clock },
-      { name: "Recruitment", path: "/tools/recruitment", icon: UserPlus }
+      { name: "Attendance", path: "/attendance", icon: Clock },
+      { name: "Recruitment", path: "/recruitment", icon: UserPlus }
     ]
   },
   {
     title: "IT",
     items: [
-      { name: "Tickets Handling", path: "/tools/tickets", icon: Ticket },
-      { name: "Subscriptions", path: "/tools/subscriptions", icon: CreditCard },
-      { name: "Assets", path: "/tools/assets", icon: Laptop }
+      { name: "Tickets Handling", path: "/tickets", icon: Ticket },
+      { name: "Subscriptions", path: "/subscriptions", icon: CreditCard },
+      { name: "Assets", path: "/assets", icon: Laptop }
     ]
   },
   {
     title: "Shop",
     items: [
-      { name: "Income & Expenditure Tracker", path: "/tools/shop-income-expense", icon: Store }
+      { name: "Income & Expenditure Tracker", path: "/shop-income-expense", icon: Store }
     ]
   },
   {
     title: "Manufacturing",
     items: [
-      { name: "Inventory", path: "/tools/inventory", icon: Box }
+      { name: "Inventory", path: "/inventory", icon: Box }
     ]
   },
   {
     title: "Sales",
     items: [
-      { name: "CRM", path: "/tools/crm", icon: Target }
+      { name: "CRM", path: "/crm", icon: Target }
     ]
   },
   {
     title: "Marketing",
     items: [
-      { name: "Marketing", path: "/tools/marketing", icon: CheckCircle }
+      { name: "Marketing", path: "/marketing", icon: CheckCircle }
     ]
   },
   {
     title: "Productivity",
     items: [
-      { name: "Personal Expense Tracker", path: "/tools/personal-expense", icon: CheckCircle }
+      { name: "Personal Expense Tracker", path: "/personal-expense", icon: CheckCircle }
     ]
   },
   {
     title: "Custom",
     items: [
-      { name: "Contact Us", path: "/tools/contact", icon: PhoneCall }
+      { name: "Contact Us", path: "/contact", icon: PhoneCall }
     ]
   }
 ];
@@ -149,12 +149,21 @@ const Navbar = () => {
   const getInitials = (email: string) => {
     return email.substring(0, 2).toUpperCase();
   };
-  return <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-border z-50 overflow-hidden">
-      <div className="w-full px-8 overflow-hidden">
-        <div className="flex items-center justify-between h-16 gap-4">
+  return <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-border z-50">
+      <div className="w-full">
+        <div className="flex items-center justify-between h-12 gap-4 px-4 md:px-8">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center flex-shrink-0">
-              <img src={logo} alt="AppMaster" className="h-14 w-auto" />
+              <img 
+                src={logo} 
+                alt="AppMaster" 
+                className="h-10 w-auto"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                width="40"
+                height="40"
+              />
             </Link>
             <div className="hidden md:flex">
               <NavigationMenu>
@@ -164,7 +173,7 @@ const Navbar = () => {
                       Products
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="w-[800px] p-6 bg-popover">
+                      <div className="w-[800px] p-6 bg-popover backdrop-blur-xl border border-border/50 shadow-2xl">
                         <div className="grid grid-cols-3 gap-6">
                           {productCategories.map((category, idx) => (
                             <div key={idx} className="space-y-3 animate-fade-in" style={{ animationDelay: `${idx * 0.05}s`, animationFillMode: 'both' }}>
@@ -207,9 +216,9 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             {user ? <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full z-50">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-primary text-primary-foreground">
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full z-50">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                         {getInitials(user.email || "U")}
                       </AvatarFallback>
                     </Avatar>
@@ -226,10 +235,6 @@ const Navbar = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/settings")}>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </DropdownMenuItem>

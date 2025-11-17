@@ -12,8 +12,8 @@ const benefits = [
 const Benefits = () => {
   return (
     <section className="py-24">
-      <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="w-full">
+        <div className="grid lg:grid-cols-2 gap-12 items-center max-w-[1400px] mx-auto px-4">
           <div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
               Why Choose Our Platform?

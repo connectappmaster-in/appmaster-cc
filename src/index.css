@@ -115,9 +115,22 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    width: 100%;
   }
   
   html {
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+  
+  #root {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
   }
 }

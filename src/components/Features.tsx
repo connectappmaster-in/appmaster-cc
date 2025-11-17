@@ -91,8 +91,8 @@ const features = [{
 }];
 const Features = () => {
   return <section className="pb-16 bg-muted/30">
-      <div className="w-full px-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1400px] mx-auto">
+      <div className="w-full">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1400px] mx-auto px-4">
           {features.map((feature, index) => {
           const Icon = feature.icon;
           return <div key={index} className="bg-card rounded-xl border border-border hover:shadow-lg hover:border-primary/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex h-[180px] animate-fade-in" style={{ animationDelay: `${index * 0.1}s`, animationFillMode: 'both' }}>

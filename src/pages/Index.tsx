@@ -6,7 +6,7 @@ import Stats from "@/components/Stats";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 const Index = () => {
-  return <div className="min-h-screen">
+  return <div className="min-h-screen w-full">
       <Navbar />
       <Hero />
       

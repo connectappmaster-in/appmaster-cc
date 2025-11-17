@@ -15,13 +15,19 @@ import Assets from "./pages/assets";
 import ShopIncomeExpense from "./pages/shop-income-expense";
 import Inventory from "./pages/inventory";
 import CRM from "./pages/crm";
+import LeadsListPage from "./pages/crm/leads";
+import NewLeadPage from "./pages/crm/leads/new";
+import CustomersListPage from "./pages/crm/customers";
+import OpportunitiesPage from "./pages/crm/opportunities";
+import QuotesListPage from "./pages/crm/quotes";
 import Marketing from "./pages/marketing";
 import PersonalExpense from "./pages/personal-expense";
 import Contact from "./pages/contact";
-import Admin from "./pages/admin";
+import Admin from "./pages/admin/index";
 import Login from "./pages/Login";
+import AuthConfirm from "./pages/AuthConfirm";
+
 import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
 import InitializeAdmin from "./pages/InitializeAdmin";
 
 const queryClient = new QueryClient();
@@ -35,22 +41,28 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/confirm" element={<AuthConfirm />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/settings" element={<Profile />} />
           <Route path="/initialize-admin" element={<InitializeAdmin />} />
-          <Route path="/tools/depreciation" element={<Depreciation />} />
-          <Route path="/tools/invoicing" element={<Invoicing />} />
-          <Route path="/tools/attendance" element={<Attendance />} />
-          <Route path="/tools/recruitment" element={<Recruitment />} />
-          <Route path="/tools/tickets" element={<Tickets />} />
-          <Route path="/tools/subscriptions" element={<Subscriptions />} />
-          <Route path="/tools/assets" element={<Assets />} />
-          <Route path="/tools/shop-income-expense" element={<ShopIncomeExpense />} />
-          <Route path="/tools/inventory" element={<Inventory />} />
-          <Route path="/tools/crm" element={<CRM />} />
-          <Route path="/tools/marketing" element={<Marketing />} />
-          <Route path="/tools/personal-expense" element={<PersonalExpense />} />
-          <Route path="/tools/contact" element={<Contact />} />
+          <Route path="/depreciation" element={<Depreciation />} />
+          <Route path="/invoicing" element={<Invoicing />} />
+          <Route path="/attendance" element={<Attendance />} />
+          <Route path="/recruitment" element={<Recruitment />} />
+          <Route path="/tickets" element={<Tickets />} />
+          <Route path="/subscriptions" element={<Subscriptions />} />
+          <Route path="/assets" element={<Assets />} />
+          <Route path="/shop-income-expense" element={<ShopIncomeExpense />} />
+          <Route path="/inventory" element={<Inventory />} />
+          <Route path="/crm" element={<CRM />} />
+          <Route path="/crm/leads" element={<LeadsListPage />} />
+          <Route path="/crm/leads/new" element={<NewLeadPage />} />
+          <Route path="/crm/customers" element={<CustomersListPage />} />
+          <Route path="/crm/opportunities" element={<OpportunitiesPage />} />
+          <Route path="/crm/quotes" element={<QuotesListPage />} />
+          <Route path="/marketing" element={<Marketing />} />
+          <Route path="/personal-expense" element={<PersonalExpense />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
