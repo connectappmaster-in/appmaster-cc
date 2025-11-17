@@ -16,6 +16,7 @@ import ShopIncomeExpense from "./pages/shop-income-expense";
 import Inventory from "./pages/inventory";
 import CRM from "./pages/crm";
 import LeadsListPage from "./pages/crm/leads";
+import LeadDetailPage from "./pages/crm/leads/[id]";
 import NewLeadPage from "./pages/crm/leads/new";
 import CustomersListPage from "./pages/crm/customers";
 import OpportunitiesPage from "./pages/crm/opportunities";
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/crm" element={<CRM />} />
           <Route path="/crm/leads" element={<LeadsListPage />} />
           <Route path="/crm/leads/new" element={<NewLeadPage />} />
+          <Route path="/crm/leads/:id" element={<LeadDetailPage />} />
           <Route path="/crm/customers" element={<CustomersListPage />} />
           <Route path="/crm/opportunities" element={<OpportunitiesPage />} />
           <Route path="/crm/quotes" element={<QuotesListPage />} />

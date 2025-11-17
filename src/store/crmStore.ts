@@ -5,13 +5,20 @@ import { toast } from 'sonner';
 interface Lead {
   id: string;
   title: string;
-  company: string;
-  email: string;
-  phone: string;
-  source: string;
+  company: string | null;
+  email: string | null;
+  phone: string | null;
+  source: string | null;
   status: string;
-  score: number;
-  assigned_to: string;
+  score: number | null;
+  assigned_to: string | null;
+  notes: string | null;
+  value: number | null;
+  probability: number | null;
+  expected_close_date: string | null;
+  currency: string | null;
+  tags: any;
+  created_by: string;
   created_at: string;
   updated_at: string;
 }
