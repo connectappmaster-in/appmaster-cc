@@ -1,3 +1,4 @@
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,12 +17,9 @@ import ShopIncomeExpense from "./pages/shop-income-expense";
 import Inventory from "./pages/inventory";
 import CRM from "./pages/crm";
 import LeadsListPage from "./pages/crm/leads";
-import LeadDetailPage from "./pages/crm/leads/[id]";
 import NewLeadPage from "./pages/crm/leads/new";
 import CustomersListPage from "./pages/crm/customers";
-import CustomerDetailPage from "./pages/crm/customers/[id]";
 import OpportunitiesPage from "./pages/crm/opportunities";
-import OpportunityDetailPage from "./pages/crm/opportunities/[id]";
 import QuotesListPage from "./pages/crm/quotes";
 import Marketing from "./pages/marketing";
 import PersonalExpense from "./pages/personal-expense";
@@ -33,15 +31,23 @@ import AuthConfirm from "./pages/AuthConfirm";
 import Profile from "./pages/Profile";
 import InitializeAdmin from "./pages/InitializeAdmin";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      retry: 1,
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/auth/confirm" element={<AuthConfirm />} />
@@ -60,11 +66,8 @@ const App = () => (
           <Route path="/crm" element={<CRM />} />
           <Route path="/crm/leads" element={<LeadsListPage />} />
           <Route path="/crm/leads/new" element={<NewLeadPage />} />
-          <Route path="/crm/leads/:id" element={<LeadDetailPage />} />
           <Route path="/crm/customers" element={<CustomersListPage />} />
-          <Route path="/crm/customers/:id" element={<CustomerDetailPage />} />
           <Route path="/crm/opportunities" element={<OpportunitiesPage />} />
-          <Route path="/crm/opportunities/:id" element={<OpportunityDetailPage />} />
           <Route path="/crm/quotes" element={<QuotesListPage />} />
           <Route path="/marketing" element={<Marketing />} />
           <Route path="/personal-expense" element={<PersonalExpense />} />
@@ -76,6 +79,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
