@@ -44,8 +44,8 @@ export const EditAssetDialog = ({
 }: EditAssetDialogProps) => {
   const queryClient = useQueryClient();
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
-  const { sites, locations, categories, departments } = useAssetSetupConfig();
-  
+  const { sites, locations, categories, departments, makes } = useAssetSetupConfig();
+   
   const form = useForm<z.infer<typeof assetSchema>>({
     resolver: zodResolver(assetSchema),
     defaultValues: {
@@ -199,9 +199,20 @@ export const EditAssetDialog = ({
                 field
               }) => <FormItem>
                       <FormLabel>Make *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Dell, HP, Lenovo" {...field} />
-                      </FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select make" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {makes.map((make) => (
+                            <SelectItem key={make.id} value={make.name}>
+                              {make.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>} />
 

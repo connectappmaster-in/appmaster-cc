@@ -41,7 +41,7 @@ export const CreateAssetDialog = ({
   const queryClient = useQueryClient();
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
   const [isGeneratingId, setIsGeneratingId] = useState(false);
-  const { sites, locations, categories, departments } = useAssetSetupConfig();
+  const { sites, locations, categories, departments, makes } = useAssetSetupConfig();
   const form = useForm<z.infer<typeof assetSchema>>({
     resolver: zodResolver(assetSchema),
     defaultValues: {
@@ -93,6 +93,10 @@ export const CreateAssetDialog = ({
     // Prefer start_number length, then padding_length, then default
     const paddingLength = (tagFormat?.start_number?.length ?? 0) || tagFormat?.padding_length || 4;
 
+    const startNumberRaw = tagFormat?.start_number || '1';
+    const parsedStart = parseInt(startNumberRaw, 10);
+    const effectiveStart = Number.isNaN(parsedStart) ? 1 : parsedStart;
+
     // Get the highest existing asset ID
     const { data: assets } = await supabase
       .from('itam_assets')
@@ -114,7 +118,8 @@ export const CreateAssetDialog = ({
       });
     }
 
-    const nextNumber = maxNumber + 1;
+    const candidateNext = maxNumber > 0 ? maxNumber + 1 : effectiveStart;
+    const nextNumber = Math.max(candidateNext, effectiveStart);
     const paddedNumber = nextNumber.toString().padStart(paddingLength, '0');
     return `${prefix}${paddedNumber}`;
   };
@@ -295,9 +300,20 @@ export const CreateAssetDialog = ({
                 field
               }) => <FormItem>
                       <FormLabel className="text-xs">Make *</FormLabel>
-                      <FormControl>
-                        <Input className="h-8" {...field} />
-                      </FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Select make" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {makes.map((make) => (
+                            <SelectItem key={make.id} value={make.name}>
+                              {make.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>} />
 

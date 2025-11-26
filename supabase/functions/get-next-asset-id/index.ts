@@ -68,10 +68,14 @@ serve(async (req) => {
     // Prefer start_number length, then padding_length, then default
     const paddingLength = (tagFormat?.start_number?.length ?? 0) || tagFormat?.padding_length || 4;
 
+    const startNumberRaw = tagFormat?.start_number || '1';
+    const parsedStart = parseInt(startNumberRaw, 10);
+    const effectiveStart = Number.isNaN(parsedStart) ? 1 : parsedStart;
+ 
     // Call the database function to get the next number
     const { data: nextNumberData, error: nextNumberError } = await supabaseClient
       .rpc('get_next_asset_number', { p_organisation_id: organisationId });
-
+ 
     if (nextNumberError) {
       console.error('Error getting next asset number:', nextNumberError);
       return new Response(
@@ -79,8 +83,11 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    const nextNumber = nextNumberData || 1;
+ 
+    const rawNextNumber = typeof nextNumberData === 'number'
+      ? nextNumberData
+      : parseInt(String(nextNumberData ?? '0'), 10) || 1;
+    const nextNumber = Math.max(rawNextNumber, effectiveStart);
     const paddedNumber = nextNumber.toString().padStart(paddingLength, '0');
     const nextAssetId = `${prefix}${paddedNumber}`;
 
