@@ -448,10 +448,7 @@ export default function FieldsSetupPage() {
           <TabsContent value="tag-format" className="mt-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Hash className="h-4 w-4" />
-                  Asset Tag Format by Category
-                </CardTitle>
+                
                 <CardDescription className="text-xs">
                   Configure unique tag format for each category
                 </CardDescription>
