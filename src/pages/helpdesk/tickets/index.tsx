@@ -20,7 +20,6 @@ import { EditProblemDialog } from "@/components/helpdesk/EditProblemDialog";
 import { AssignProblemDialog } from "@/components/helpdesk/AssignProblemDialog";
 import { ProblemTableView } from "@/components/helpdesk/ProblemTableView";
 import { useHelpdeskStats } from "@/hooks/useHelpdeskStats";
-
 export default function TicketsModule() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -82,25 +81,21 @@ export default function TicketsModule() {
       const {
         data,
         error
-      } = await supabase
-        .from('helpdesk_problems')
-        .select(`
+      } = await supabase.from('helpdesk_problems').select(`
           *,
           category:helpdesk_categories(name)
-        `)
-        .eq('is_deleted', false)
-        .order('created_at', { ascending: false });
+        `).eq('is_deleted', false).order('created_at', {
+        ascending: false
+      });
       if (error) throw error;
-      
+
       // Fetch created_by users separately
       if (data && data.length > 0) {
         const userIds = [...new Set(data.map(p => p.created_by).filter(Boolean))];
         if (userIds.length > 0) {
-          const { data: users } = await supabase
-            .from('users')
-            .select('id, name, email')
-            .in('id', userIds);
-          
+          const {
+            data: users
+          } = await supabase.from('users').select('id, name, email').in('id', userIds);
           if (users) {
             const userMap = Object.fromEntries(users.map(u => [u.id, u]));
             return data.map(problem => ({
@@ -110,21 +105,17 @@ export default function TicketsModule() {
           }
         }
       }
-      
       return data || [];
     }
   });
-  
+
   // Client-side filtering for problems
   const problems = (allProblems || []).filter((problem: any) => {
     if (problemFilters.status && problem.status !== problemFilters.status) return false;
     if (problemFilters.priority && problem.priority !== problemFilters.priority) return false;
     if (problemFilters.search) {
       const search = problemFilters.search.toLowerCase();
-      const matchesSearch = 
-        problem.title?.toLowerCase().includes(search) || 
-        problem.description?.toLowerCase().includes(search) || 
-        problem.problem_number?.toLowerCase().includes(search);
+      const matchesSearch = problem.title?.toLowerCase().includes(search) || problem.description?.toLowerCase().includes(search) || problem.problem_number?.toLowerCase().includes(search);
       if (!matchesSearch) return false;
     }
     return true;
@@ -141,9 +132,10 @@ export default function TicketsModule() {
   const handleSelectAllProblems = (checked: boolean) => {
     setSelectedProblemIds(checked ? problems.map((p: any) => p.id) : []);
   };
-
-  const { data: stats, isLoading: statsLoading } = useHelpdeskStats();
-
+  const {
+    data: stats,
+    isLoading: statsLoading
+  } = useHelpdeskStats();
   const quickLinks: any[] = [];
   return <div className="min-h-screen bg-background">
       <div className="w-full px-4 pt-2 pb-3">
@@ -158,41 +150,31 @@ export default function TicketsModule() {
               <TabsTrigger value="tickets" className="gap-1.5 px-3 text-sm h-7">
                 <Ticket className="h-3.5 w-3.5" />
                 All Tickets
-                {tickets.length > 0 && <Badge variant="secondary" className="ml-1.5 text-xs px-1.5 py-0">
-                    {tickets.length}
-                  </Badge>}
+                {tickets.length > 0}
               </TabsTrigger>
               <TabsTrigger value="problems" className="gap-1.5 px-3 text-sm h-7">
                 <AlertTriangle className="h-3.5 w-3.5" />
                 Problems
-                {problems.length > 0 && <Badge variant="secondary" className="ml-1.5 text-xs px-1.5 py-0">
-                    {problems.length}
-                  </Badge>}
+                {problems.length > 0}
               </TabsTrigger>
             </TabsList>
 
-            {activeTab === 'tickets' && (
-              <>
+            {activeTab === 'tickets' && <>
                 <div className="relative w-[250px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search tickets..."
-                    value={filters.search || ''}
-                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                    className="pl-9 h-8"
-                  />
+                  <Input placeholder="Search tickets..." value={filters.search || ''} onChange={e => setFilters({
+                ...filters,
+                search: e.target.value
+              })} className="pl-9 h-8" />
                 </div>
 
                 <div className="flex items-center gap-2 ml-auto">
-                  <BulkActionsButton 
-                    selectedIds={selectedIds} 
-                    onClearSelection={() => setSelectedIds([])} 
-                  />
+                  <BulkActionsButton selectedIds={selectedIds} onClearSelection={() => setSelectedIds([])} />
                   
-                  <Select
-                    value={filters.status || 'all'}
-                    onValueChange={(value) => setFilters({ ...filters, status: value === 'all' ? null : value })}
-                  >
+                  <Select value={filters.status || 'all'} onValueChange={value => setFilters({
+                ...filters,
+                status: value === 'all' ? null : value
+              })}>
                     <SelectTrigger className="w-[120px] h-8">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
@@ -206,10 +188,10 @@ export default function TicketsModule() {
                     </SelectContent>
                   </Select>
 
-                  <Select
-                    value={filters.priority || 'all'}
-                    onValueChange={(value) => setFilters({ ...filters, priority: value === 'all' ? null : value })}
-                  >
+                  <Select value={filters.priority || 'all'} onValueChange={value => setFilters({
+                ...filters,
+                priority: value === 'all' ? null : value
+              })}>
                     <SelectTrigger className="w-[120px] h-8">
                       <SelectValue placeholder="Priority" />
                     </SelectTrigger>
@@ -227,31 +209,24 @@ export default function TicketsModule() {
                     <span className="text-sm">New Ticket</span>
                   </Button>
                 </div>
-              </>
-            )}
+              </>}
 
-            {activeTab === 'problems' && (
-              <>
+            {activeTab === 'problems' && <>
                 <div className="relative w-[250px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search problems..."
-                    value={problemFilters.search || ''}
-                    onChange={(e) => setProblemFilters({ ...problemFilters, search: e.target.value })}
-                    className="pl-9 h-8"
-                  />
+                  <Input placeholder="Search problems..." value={problemFilters.search || ''} onChange={e => setProblemFilters({
+                ...problemFilters,
+                search: e.target.value
+              })} className="pl-9 h-8" />
                 </div>
 
                 <div className="flex items-center gap-2 ml-auto">
-                  <BulkActionsProblemButton 
-                    selectedIds={selectedProblemIds} 
-                    onClearSelection={() => setSelectedProblemIds([])} 
-                  />
+                  <BulkActionsProblemButton selectedIds={selectedProblemIds} onClearSelection={() => setSelectedProblemIds([])} />
                   
-                  <Select
-                    value={problemFilters.status || 'all'}
-                    onValueChange={(value) => setProblemFilters({ ...problemFilters, status: value === 'all' ? null : value })}
-                  >
+                  <Select value={problemFilters.status || 'all'} onValueChange={value => setProblemFilters({
+                ...problemFilters,
+                status: value === 'all' ? null : value
+              })}>
                     <SelectTrigger className="w-[120px] h-8">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
@@ -265,10 +240,10 @@ export default function TicketsModule() {
                     </SelectContent>
                   </Select>
 
-                  <Select
-                    value={problemFilters.priority || 'all'}
-                    onValueChange={(value) => setProblemFilters({ ...problemFilters, priority: value === 'all' ? null : value })}
-                  >
+                  <Select value={problemFilters.priority || 'all'} onValueChange={value => setProblemFilters({
+                ...problemFilters,
+                priority: value === 'all' ? null : value
+              })}>
                     <SelectTrigger className="w-[120px] h-8">
                       <SelectValue placeholder="Priority" />
                     </SelectTrigger>
@@ -286,17 +261,13 @@ export default function TicketsModule() {
                     <span className="text-sm">New Problem</span>
                   </Button>
                 </div>
-              </>
-            )}
+              </>}
           </div>
 
           <TabsContent value="overview" className="space-y-4 mt-2">
-            {statsLoading ? (
-              <div className="flex items-center justify-center py-12">
+            {statsLoading ? <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <>
+              </div> : <>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                   <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab("tickets")}>
                     <CardContent className="p-4">
@@ -370,8 +341,7 @@ export default function TicketsModule() {
                     </CardContent>
                   </Card>
                 </div>
-              </>
-            )}
+              </>}
           </TabsContent>
 
           <TabsContent value="tickets" className="space-y-2 mt-2">
@@ -393,14 +363,7 @@ export default function TicketsModule() {
                     <Plus className="h-3.5 w-3.5" />
                     <span className="text-sm">Create First Ticket</span>
                   </Button>}
-              </div> : <TicketTableView 
-                tickets={tickets} 
-                selectedIds={selectedIds} 
-                onSelectTicket={handleSelectTicket} 
-                onSelectAll={handleSelectAll}
-                onEditTicket={setEditTicket}
-                onAssignTicket={setAssignTicket}
-              />}
+              </div> : <TicketTableView tickets={tickets} selectedIds={selectedIds} onSelectTicket={handleSelectTicket} onSelectAll={handleSelectAll} onEditTicket={setEditTicket} onAssignTicket={setAssignTicket} />}
           </TabsContent>
 
           <TabsContent value="problems" className="space-y-2">
@@ -416,46 +379,15 @@ export default function TicketsModule() {
                   <Plus className="h-3.5 w-3.5" />
                   <span className="text-sm">Create First Problem</span>
                 </Button>
-              </div> : <ProblemTableView 
-                problems={problems} 
-                selectedIds={selectedProblemIds} 
-                onSelectProblem={handleSelectProblem} 
-                onSelectAll={handleSelectAllProblems}
-                onEditProblem={setEditProblem}
-                onAssignProblem={setAssignProblem}
-              />}
+              </div> : <ProblemTableView problems={problems} selectedIds={selectedProblemIds} onSelectProblem={handleSelectProblem} onSelectAll={handleSelectAllProblems} onEditProblem={setEditProblem} onAssignProblem={setAssignProblem} />}
           </TabsContent>
         </Tabs>
 
         <CreateProblemDialog open={createProblemOpen} onOpenChange={setCreateProblemOpen} />
-        {editTicket && (
-          <EditTicketDialog 
-            open={!!editTicket} 
-            onOpenChange={(open) => !open && setEditTicket(null)}
-            ticket={editTicket}
-          />
-        )}
-        {assignTicket && (
-          <AssignTicketDialog 
-            open={!!assignTicket} 
-            onOpenChange={(open) => !open && setAssignTicket(null)}
-            ticket={assignTicket}
-          />
-        )}
-        {editProblem && (
-          <EditProblemDialog 
-            open={!!editProblem} 
-            onOpenChange={(open) => !open && setEditProblem(null)}
-            problem={editProblem}
-          />
-        )}
-        {assignProblem && (
-          <AssignProblemDialog 
-            open={!!assignProblem} 
-            onOpenChange={(open) => !open && setAssignProblem(null)}
-            problem={assignProblem}
-          />
-        )}
+        {editTicket && <EditTicketDialog open={!!editTicket} onOpenChange={open => !open && setEditTicket(null)} ticket={editTicket} />}
+        {assignTicket && <AssignTicketDialog open={!!assignTicket} onOpenChange={open => !open && setAssignTicket(null)} ticket={assignTicket} />}
+        {editProblem && <EditProblemDialog open={!!editProblem} onOpenChange={open => !open && setEditProblem(null)} problem={editProblem} />}
+        {assignProblem && <AssignProblemDialog open={!!assignProblem} onOpenChange={open => !open && setAssignProblem(null)} problem={assignProblem} />}
       </div>
     </div>;
 }
