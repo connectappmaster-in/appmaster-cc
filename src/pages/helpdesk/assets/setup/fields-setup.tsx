@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BackButton } from "@/components/BackButton";
 import { Button } from "@/components/ui/button";
@@ -6,43 +6,87 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Building2, MapPin, FolderTree, Briefcase, Hash } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, MapPin, FolderTree, Briefcase, Hash, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAssetSetupConfig } from "@/hooks/useAssetSetupConfig";
 
 export default function FieldsSetupPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("company");
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("tag-format");
+  const { sites, locations, categories, departments, tagFormat: existingTagFormat } = useAssetSetupConfig();
+  
+  const [tagPrefix, setTagPrefix] = useState("");
+  const [tagStartNumber, setTagStartNumber] = useState("");
+  const [tagPaddingLength, setTagPaddingLength] = useState(6);
 
-  // Mock data - would be from DB in production
-  const [sites, setSites] = useState([
-    { id: 1, name: "Head Office", code: "HO", address: "123 Main St" },
-    { id: 2, name: "Branch Office", code: "BR", address: "456 Side St" },
-  ]);
+  // Load existing tag format when it's available
+  useEffect(() => {
+    if (existingTagFormat) {
+      setTagPrefix(existingTagFormat.prefix || "AS-");
+      setTagStartNumber(existingTagFormat.start_number || "0001");
+      setTagPaddingLength(existingTagFormat.padding_length || 6);
+    }
+  }, [existingTagFormat]);
 
-  const [locations, setLocations] = useState([
-    { id: 1, name: "Server Room", site: "Head Office", floor: "3rd Floor" },
-    { id: 2, name: "Office Space", site: "Head Office", floor: "2nd Floor" },
-  ]);
+  const saveTagFormat = useMutation({
+    mutationFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
-  const [categories, setCategories] = useState([
-    { id: 1, name: "Laptop", code: "LTP" },
-    { id: 2, name: "Desktop", code: "DSK" },
-    { id: 3, name: "Monitor", code: "MON" },
-  ]);
+      const { data: userData } = await supabase
+        .from("users")
+        .select("organisation_id")
+        .eq("auth_user_id", user.id)
+        .single();
 
-  const [departments, setDepartments] = useState([
-    { id: 1, name: "IT", code: "IT" },
-    { id: 2, name: "Finance", code: "FIN" },
-    { id: 3, name: "HR", code: "HR" },
-  ]);
+      if (!userData?.organisation_id) throw new Error("Organization not found");
 
-  const [tagFormat, setTagFormat] = useState({
-    prefix: "RT-",
-    startNumber: "0001",
-    autoIncrement: true,
+      // Check if tag format already exists
+      const { data: existing } = await supabase
+        .from("itam_tag_format")
+        .select("id")
+        .eq("organisation_id", userData.organisation_id)
+        .maybeSingle();
+
+      if (existing) {
+        // Update existing
+        const { error } = await supabase
+          .from("itam_tag_format")
+          .update({
+            prefix: tagPrefix,
+            start_number: tagStartNumber,
+            padding_length: tagPaddingLength,
+          })
+          .eq("id", existing.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new
+        const { error } = await supabase
+          .from("itam_tag_format")
+          .insert({
+            organisation_id: userData.organisation_id,
+            prefix: tagPrefix,
+            start_number: tagStartNumber,
+            padding_length: tagPaddingLength,
+            auto_increment: true,
+          });
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Tag format saved successfully");
+      queryClient.invalidateQueries({ queryKey: ["itam-tag-format"] });
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to save tag format: " + error.message);
+    },
   });
 
   return (
@@ -89,20 +133,6 @@ export default function FieldsSetupPage() {
                     <Input id="company-code" placeholder="e.g., ACME" />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company-address">Address</Label>
-                  <Textarea id="company-address" placeholder="Enter company address" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="company-email">Email</Label>
-                    <Input id="company-email" type="email" placeholder="contact@company.com" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company-phone">Phone</Label>
-                    <Input id="company-phone" placeholder="+1234567890" />
-                  </div>
-                </div>
                 <Button size="sm">Save Company Info</Button>
               </CardContent>
             </Card>
@@ -129,8 +159,7 @@ export default function FieldsSetupPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>NAME</TableHead>
-                      <TableHead>CODE</TableHead>
-                      <TableHead>ADDRESS</TableHead>
+                      <TableHead>STATUS</TableHead>
                       <TableHead className="text-right">ACTIONS</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -139,15 +168,11 @@ export default function FieldsSetupPage() {
                       <TableRow key={site.id}>
                         <TableCell className="font-medium">{site.name}</TableCell>
                         <TableCell>
-                          <Badge variant="secondary">{site.code}</Badge>
+                          <Badge variant="secondary">Active</Badge>
                         </TableCell>
-                        <TableCell>{site.address}</TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" className="h-7 w-7">
                             <Pencil className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -180,7 +205,6 @@ export default function FieldsSetupPage() {
                     <TableRow>
                       <TableHead>NAME</TableHead>
                       <TableHead>SITE</TableHead>
-                      <TableHead>FLOOR</TableHead>
                       <TableHead className="text-right">ACTIONS</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -188,14 +212,10 @@ export default function FieldsSetupPage() {
                     {locations.map((location) => (
                       <TableRow key={location.id}>
                         <TableCell className="font-medium">{location.name}</TableCell>
-                        <TableCell>{location.site}</TableCell>
-                        <TableCell>{location.floor}</TableCell>
+                        <TableCell>{(location as any).itam_sites?.name || "—"}</TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" className="h-7 w-7">
                             <Pencil className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -227,7 +247,7 @@ export default function FieldsSetupPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>NAME</TableHead>
-                      <TableHead>CODE</TableHead>
+                      <TableHead>STATUS</TableHead>
                       <TableHead className="text-right">ACTIONS</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -236,14 +256,11 @@ export default function FieldsSetupPage() {
                       <TableRow key={category.id}>
                         <TableCell className="font-medium">{category.name}</TableCell>
                         <TableCell>
-                          <Badge variant="secondary">{category.code}</Badge>
+                          <Badge variant="secondary">Active</Badge>
                         </TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" className="h-7 w-7">
                             <Pencil className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -275,7 +292,7 @@ export default function FieldsSetupPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>NAME</TableHead>
-                      <TableHead>CODE</TableHead>
+                      <TableHead>STATUS</TableHead>
                       <TableHead className="text-right">ACTIONS</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -284,14 +301,11 @@ export default function FieldsSetupPage() {
                       <TableRow key={dept.id}>
                         <TableCell className="font-medium">{dept.name}</TableCell>
                         <TableCell>
-                          <Badge variant="secondary">{dept.code}</Badge>
+                          <Badge variant="secondary">Active</Badge>
                         </TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" className="h-7 w-7">
                             <Pencil className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -320,8 +334,8 @@ export default function FieldsSetupPage() {
                     <Label htmlFor="tag-prefix">Prefix</Label>
                     <Input
                       id="tag-prefix"
-                      value={tagFormat.prefix}
-                      onChange={(e) => setTagFormat({ ...tagFormat, prefix: e.target.value })}
+                      value={tagPrefix}
+                      onChange={(e) => setTagPrefix(e.target.value)}
                       placeholder="e.g., RT-, IT-, AS-"
                     />
                   </div>
@@ -329,8 +343,8 @@ export default function FieldsSetupPage() {
                     <Label htmlFor="tag-start">Starting Number</Label>
                     <Input
                       id="tag-start"
-                      value={tagFormat.startNumber}
-                      onChange={(e) => setTagFormat({ ...tagFormat, startNumber: e.target.value })}
+                      value={tagStartNumber}
+                      onChange={(e) => setTagStartNumber(e.target.value)}
                       placeholder="e.g., 0001, 0100, 5000"
                     />
                   </div>
@@ -338,10 +352,15 @@ export default function FieldsSetupPage() {
                 <div className="p-4 bg-muted rounded-md">
                   <div className="text-sm font-medium mb-2">Preview:</div>
                   <div className="text-lg font-mono">
-                    {tagFormat.prefix}{tagFormat.startNumber}
+                    {tagPrefix}{tagStartNumber}
                   </div>
                 </div>
-                <Button size="sm" onClick={() => toast.success("Tag format saved")}>
+                <Button 
+                  size="sm" 
+                  onClick={() => saveTagFormat.mutate()}
+                  disabled={saveTagFormat.isPending}
+                >
+                  {saveTagFormat.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   Save Tag Format
                 </Button>
               </CardContent>

@@ -70,23 +70,73 @@ export const CreateAssetDialog = ({
     }
   }, [open]);
 
+  const generateFallbackAssetId = async (): Promise<string> => {
+    // Fallback: Get the last asset ID from the database and increment
+    const { data: userData } = await supabase
+      .from('users')
+      .select('organisation_id')
+      .eq('auth_user_id', (await supabase.auth.getUser()).data.user?.id)
+      .single();
+
+    if (!userData?.organisation_id) {
+      return `AS-${Date.now().toString().slice(-6)}`;
+    }
+
+    // Get tag format
+    const { data: tagFormat } = await supabase
+      .from('itam_tag_format')
+      .select('prefix, padding_length')
+      .eq('organisation_id', userData.organisation_id)
+      .maybeSingle();
+
+    const prefix = tagFormat?.prefix || 'AS-';
+    const paddingLength = tagFormat?.padding_length || 6;
+
+    // Get the highest existing asset ID
+    const { data: assets } = await supabase
+      .from('itam_assets')
+      .select('asset_id')
+      .eq('organisation_id', userData.organisation_id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    let maxNumber = 0;
+    if (assets && assets.length > 0) {
+      assets.forEach(asset => {
+        if (asset.asset_id?.startsWith(prefix)) {
+          const numPart = asset.asset_id.substring(prefix.length).replace(/\D/g, '');
+          const num = parseInt(numPart, 10);
+          if (!isNaN(num) && num > maxNumber) {
+            maxNumber = num;
+          }
+        }
+      });
+    }
+
+    const nextNumber = maxNumber + 1;
+    const paddedNumber = nextNumber.toString().padStart(paddingLength, '0');
+    return `${prefix}${paddedNumber}`;
+  };
+
   const fetchNextAssetId = async () => {
     setIsGeneratingId(true);
     try {
+      // Try to use the edge function first
       const { data, error } = await supabase.functions.invoke('get-next-asset-id');
       
-      if (error) {
-        console.error('Error fetching next asset ID:', error);
-        toast.error('Failed to generate asset ID');
-        return;
-      }
-
-      if (data?.assetId) {
+      if (error || !data?.assetId) {
+        console.log('Edge function not available, using fallback method');
+        // Fallback to client-side generation
+        const fallbackId = await generateFallbackAssetId();
+        form.setValue('asset_id', fallbackId);
+      } else {
         form.setValue('asset_id', data.assetId);
       }
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to generate asset ID');
+      console.log('Error calling edge function, using fallback:', error);
+      // Use fallback on any error
+      const fallbackId = await generateFallbackAssetId();
+      form.setValue('asset_id', fallbackId);
     } finally {
       setIsGeneratingId(false);
     }
