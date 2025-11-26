@@ -246,16 +246,25 @@ const Login = () => {
               {signupStep === 1 && <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Account Type</Label>
-                    <ToggleGroup type="single" value={accountType} onValueChange={value => {
-                if (value) {
-                  setAccountType(value as 'personal' | 'organization');
-                  setSignupStep(2);
-                }
-              }} className="justify-start">
-                      <ToggleGroupItem value="personal" className="flex-1">
+                    <ToggleGroup type="single" value={accountType} className="justify-start">
+                      <ToggleGroupItem 
+                        value="personal" 
+                        className="flex-1"
+                        onClick={() => {
+                          setAccountType('personal');
+                          setSignupStep(2);
+                        }}
+                      >
                         Individual
                       </ToggleGroupItem>
-                      <ToggleGroupItem value="organization" className="flex-1">
+                      <ToggleGroupItem 
+                        value="organization" 
+                        className="flex-1"
+                        onClick={() => {
+                          setAccountType('organization');
+                          setSignupStep(2);
+                        }}
+                      >
                         Organization
                       </ToggleGroupItem>
                     </ToggleGroup>
