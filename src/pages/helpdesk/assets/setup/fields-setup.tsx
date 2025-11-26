@@ -29,8 +29,14 @@ export default function FieldsSetupPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("tag-format");
-  const { sites, locations, categories, departments, makes, tagFormat: existingTagFormat } = useAssetSetupConfig();
-  
+  const {
+    sites,
+    locations,
+    categories,
+    departments,
+    makes,
+    tagFormat: existingTagFormat
+  } = useAssetSetupConfig();
   const [tagPrefix, setTagPrefix] = useState("");
   const [tagStartNumber, setTagStartNumber] = useState("");
 
@@ -40,17 +46,17 @@ export default function FieldsSetupPage() {
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [departmentDialogOpen, setDepartmentDialogOpen] = useState(false);
   const [makeDialogOpen, setMakeDialogOpen] = useState(false);
-  
+
   // Edit dialog states
   const [editSiteDialogOpen, setEditSiteDialogOpen] = useState(false);
   const [editLocationDialogOpen, setEditLocationDialogOpen] = useState(false);
   const [editCategoryDialogOpen, setEditCategoryDialogOpen] = useState(false);
   const [editDepartmentDialogOpen, setEditDepartmentDialogOpen] = useState(false);
   const [editMakeDialogOpen, setEditMakeDialogOpen] = useState(false);
-  
+
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  
+
   // Selected items
   const [selectedSite, setSelectedSite] = useState<any | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<any | null>(null);
@@ -58,12 +64,12 @@ export default function FieldsSetupPage() {
   const [selectedDepartment, setSelectedDepartment] = useState<any | null>(null);
   const [selectedMake, setSelectedMake] = useState<any | null>(null);
   const [deleteItem, setDeleteItem] = useState<any | null>(null);
-  
+
   // Tag format dialog for categories
   const [tagFormatDialogOpen, setTagFormatDialogOpen] = useState(false);
   const [selectedCategoryForTag, setSelectedCategoryForTag] = useState<any | null>(null);
   const [categoryFormats, setCategoryFormats] = useState<any>({});
-  
+
   // Automatically calculate padding length from starting number
   const tagPaddingLength = tagStartNumber.length || 4;
 
@@ -78,89 +84,80 @@ export default function FieldsSetupPage() {
   // Load category tag formats
   useEffect(() => {
     const loadCategoryFormats = async () => {
-      const { data } = await supabase
-        .from('category_tag_formats')
-        .select('*');
-      
+      const {
+        data
+      } = await supabase.from('category_tag_formats').select('*');
       if (data) {
         const formats: any = {};
-        data.forEach((format) => {
+        data.forEach(format => {
           formats[`format_${format.category_id}`] = format;
         });
         setCategoryFormats(formats);
       }
     };
-    
     loadCategoryFormats();
   }, []);
-
   const saveTagFormat = useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
-
-      const { data: userData } = await supabase
-        .from("users")
-        .select("organisation_id")
-        .eq("auth_user_id", user.id)
-        .single();
-
+      const {
+        data: userData
+      } = await supabase.from("users").select("organisation_id").eq("auth_user_id", user.id).single();
       if (!userData?.organisation_id) throw new Error("Organization not found");
 
       // Check if tag format already exists
-      const { data: existing } = await supabase
-        .from("itam_tag_format")
-        .select("id")
-        .eq("organisation_id", userData.organisation_id)
-        .maybeSingle();
+      const {
+        data: existing
+      } = await supabase.from("itam_tag_format").select("id").eq("organisation_id", userData.organisation_id).maybeSingle();
 
       // Calculate padding length from starting number length
       const calculatedPaddingLength = tagStartNumber.length || 4;
-
       if (existing) {
         // Update existing
-        const { error } = await supabase
-          .from("itam_tag_format")
-          .update({
-            prefix: tagPrefix,
-            start_number: tagStartNumber,
-            padding_length: calculatedPaddingLength,
-          })
-          .eq("id", existing.id);
-
+        const {
+          error
+        } = await supabase.from("itam_tag_format").update({
+          prefix: tagPrefix,
+          start_number: tagStartNumber,
+          padding_length: calculatedPaddingLength
+        }).eq("id", existing.id);
         if (error) throw error;
       } else {
         // Insert new
-        const { error } = await supabase
-          .from("itam_tag_format")
-          .insert({
-            organisation_id: userData.organisation_id,
-            prefix: tagPrefix,
-            start_number: tagStartNumber,
-            padding_length: calculatedPaddingLength,
-            auto_increment: true,
-          });
-
+        const {
+          error
+        } = await supabase.from("itam_tag_format").insert({
+          organisation_id: userData.organisation_id,
+          prefix: tagPrefix,
+          start_number: tagStartNumber,
+          padding_length: calculatedPaddingLength,
+          auto_increment: true
+        });
         if (error) throw error;
       }
     },
     onSuccess: () => {
       toast.success("Tag format saved successfully");
-      queryClient.invalidateQueries({ queryKey: ["itam-tag-format"] });
+      queryClient.invalidateQueries({
+        queryKey: ["itam-tag-format"]
+      });
     },
     onError: (error: Error) => {
       toast.error("Failed to save tag format: " + error.message);
-    },
+    }
   });
-
-  return (
-    <div className="min-h-screen bg-background p-4">
+  return <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto space-y-4">
         <div className="flex items-center gap-4">
           <BackButton />
           <div>
             <h1 className="text-2xl font-bold">Fields Setup</h1>
-            <p className="text-sm text-muted-foreground">Configure asset management fields</p>
+            
           </div>
         </div>
 
@@ -200,38 +197,29 @@ export default function FieldsSetupPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sites.map((site) => (
-                      <TableRow key={site.id}>
+                    {sites.map(site => <TableRow key={site.id}>
                         <TableCell className="font-medium">{site.name}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">Active</Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => {
-                              setSelectedSite(site);
-                              setEditSiteDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                        setSelectedSite(site);
+                        setEditSiteDialogOpen(true);
+                      }}>
                             <Pencil className="h-3 w-3" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-destructive"
-                            onClick={() => {
-                              setDeleteItem({ ...site, type: 'site' });
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => {
+                        setDeleteItem({
+                          ...site,
+                          type: 'site'
+                        });
+                        setDeleteDialogOpen(true);
+                      }}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -264,36 +252,27 @@ export default function FieldsSetupPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {locations.map((location) => (
-                      <TableRow key={location.id}>
+                    {locations.map(location => <TableRow key={location.id}>
                         <TableCell className="font-medium">{location.name}</TableCell>
                         <TableCell>{(location as any).itam_sites?.name || "—"}</TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => {
-                              setSelectedLocation(location);
-                              setEditLocationDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                        setSelectedLocation(location);
+                        setEditLocationDialogOpen(true);
+                      }}>
                             <Pencil className="h-3 w-3" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-destructive"
-                            onClick={() => {
-                              setDeleteItem({ ...location, type: 'location' });
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => {
+                        setDeleteItem({
+                          ...location,
+                          type: 'location'
+                        });
+                        setDeleteDialogOpen(true);
+                      }}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -326,38 +305,29 @@ export default function FieldsSetupPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {categories.map((category) => (
-                      <TableRow key={category.id}>
+                    {categories.map(category => <TableRow key={category.id}>
                         <TableCell className="font-medium">{category.name}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">Active</Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => {
-                              setSelectedCategory(category);
-                              setEditCategoryDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                        setSelectedCategory(category);
+                        setEditCategoryDialogOpen(true);
+                      }}>
                             <Pencil className="h-3 w-3" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-destructive"
-                            onClick={() => {
-                              setDeleteItem({ ...category, type: 'category' });
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => {
+                        setDeleteItem({
+                          ...category,
+                          type: 'category'
+                        });
+                        setDeleteDialogOpen(true);
+                      }}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -390,38 +360,29 @@ export default function FieldsSetupPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {departments.map((dept) => (
-                      <TableRow key={dept.id}>
+                    {departments.map(dept => <TableRow key={dept.id}>
                         <TableCell className="font-medium">{dept.name}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">Active</Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => {
-                              setSelectedDepartment(dept);
-                              setEditDepartmentDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                        setSelectedDepartment(dept);
+                        setEditDepartmentDialogOpen(true);
+                      }}>
                             <Pencil className="h-3 w-3" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-destructive"
-                            onClick={() => {
-                              setDeleteItem({ ...dept, type: 'department' });
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => {
+                        setDeleteItem({
+                          ...dept,
+                          type: 'department'
+                        });
+                        setDeleteDialogOpen(true);
+                      }}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -454,38 +415,29 @@ export default function FieldsSetupPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {makes.map((make) => (
-                      <TableRow key={make.id}>
+                    {makes.map(make => <TableRow key={make.id}>
                         <TableCell className="font-medium">{make.name}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">Active</Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => {
-                              setSelectedMake(make);
-                              setEditMakeDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                        setSelectedMake(make);
+                        setEditMakeDialogOpen(true);
+                      }}>
                             <Pencil className="h-3 w-3" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-destructive"
-                            onClick={() => {
-                              setDeleteItem({ ...make, type: 'make' });
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => {
+                        setDeleteItem({
+                          ...make,
+                          type: 'make'
+                        });
+                        setDeleteDialogOpen(true);
+                      }}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -516,36 +468,28 @@ export default function FieldsSetupPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {categories.map((category) => {
-                      const formatKey = `format_${category.id}`;
-                      const format = categoryFormats[formatKey];
-                      const prefix = format?.prefix || '-';
-                      const nextNum = format?.current_number || 1;
-                      const padding = format?.zero_padding || 2;
-                      const sampleTag = format ? `${prefix}${nextNum.toString().padStart(padding, '0')}` : 'Not Configured';
-                      
-                      return (
-                        <TableRow key={category.id}>
+                    {categories.map(category => {
+                    const formatKey = `format_${category.id}`;
+                    const format = categoryFormats[formatKey];
+                    const prefix = format?.prefix || '-';
+                    const nextNum = format?.current_number || 1;
+                    const padding = format?.zero_padding || 2;
+                    const sampleTag = format ? `${prefix}${nextNum.toString().padStart(padding, '0')}` : 'Not Configured';
+                    return <TableRow key={category.id}>
                           <TableCell className="font-medium">{category.name}</TableCell>
                           <TableCell>{prefix}</TableCell>
                           <TableCell>{format ? nextNum.toString().padStart(padding, '0') : '-'}</TableCell>
                           <TableCell className="font-mono text-sm">{sampleTag}</TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={() => {
-                                setSelectedCategoryForTag(category);
-                                setTagFormatDialogOpen(true);
-                              }}
-                            >
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                          setSelectedCategoryForTag(category);
+                          setTagFormatDialogOpen(true);
+                        }}>
                               <Pencil className="h-3 w-3" />
                             </Button>
                           </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                        </TableRow>;
+                  })}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -561,65 +505,35 @@ export default function FieldsSetupPage() {
       <AddDepartmentDialog open={departmentDialogOpen} onOpenChange={setDepartmentDialogOpen} />
       <AddMakeDialog open={makeDialogOpen} onOpenChange={setMakeDialogOpen} />
       
-      <EditSiteDialog
-        open={editSiteDialogOpen && !!selectedSite}
-        onOpenChange={(open) => {
-          setEditSiteDialogOpen(open);
-          if (!open) setSelectedSite(null);
-        }}
-        site={selectedSite}
-      />
-      <EditLocationDialog
-        open={editLocationDialogOpen && !!selectedLocation}
-        onOpenChange={(open) => {
-          setEditLocationDialogOpen(open);
-          if (!open) setSelectedLocation(null);
-        }}
-        location={selectedLocation}
-      />
-      <EditCategoryDialog
-        open={editCategoryDialogOpen && !!selectedCategory}
-        onOpenChange={(open) => {
-          setEditCategoryDialogOpen(open);
-          if (!open) setSelectedCategory(null);
-        }}
-        category={selectedCategory}
-      />
-      <EditDepartmentDialog
-        open={editDepartmentDialogOpen && !!selectedDepartment}
-        onOpenChange={(open) => {
-          setEditDepartmentDialogOpen(open);
-          if (!open) setSelectedDepartment(null);
-        }}
-        department={selectedDepartment}
-      />
-      <EditMakeDialog
-        open={editMakeDialogOpen && !!selectedMake}
-        onOpenChange={(open) => {
-          setEditMakeDialogOpen(open);
-          if (!open) setSelectedMake(null);
-        }}
-        make={selectedMake}
-      />
+      <EditSiteDialog open={editSiteDialogOpen && !!selectedSite} onOpenChange={open => {
+      setEditSiteDialogOpen(open);
+      if (!open) setSelectedSite(null);
+    }} site={selectedSite} />
+      <EditLocationDialog open={editLocationDialogOpen && !!selectedLocation} onOpenChange={open => {
+      setEditLocationDialogOpen(open);
+      if (!open) setSelectedLocation(null);
+    }} location={selectedLocation} />
+      <EditCategoryDialog open={editCategoryDialogOpen && !!selectedCategory} onOpenChange={open => {
+      setEditCategoryDialogOpen(open);
+      if (!open) setSelectedCategory(null);
+    }} category={selectedCategory} />
+      <EditDepartmentDialog open={editDepartmentDialogOpen && !!selectedDepartment} onOpenChange={open => {
+      setEditDepartmentDialogOpen(open);
+      if (!open) setSelectedDepartment(null);
+    }} department={selectedDepartment} />
+      <EditMakeDialog open={editMakeDialogOpen && !!selectedMake} onOpenChange={open => {
+      setEditMakeDialogOpen(open);
+      if (!open) setSelectedMake(null);
+    }} make={selectedMake} />
       
-      <DeleteConfirmDialog
-        open={deleteDialogOpen && !!deleteItem}
-        onOpenChange={(open) => {
-          setDeleteDialogOpen(open);
-          if (!open) setDeleteItem(null);
-        }}
-        item={deleteItem}
-      />
+      <DeleteConfirmDialog open={deleteDialogOpen && !!deleteItem} onOpenChange={open => {
+      setDeleteDialogOpen(open);
+      if (!open) setDeleteItem(null);
+    }} item={deleteItem} />
 
-      <CategoryTagFormatDialog
-        open={tagFormatDialogOpen && !!selectedCategoryForTag}
-        onOpenChange={(open) => {
-          setTagFormatDialogOpen(open);
-          if (!open) setSelectedCategoryForTag(null);
-        }}
-        category={selectedCategoryForTag}
-        existingFormat={selectedCategoryForTag ? categoryFormats[`format_${selectedCategoryForTag.id}`] : null}
-      />
-    </div>
-  );
+      <CategoryTagFormatDialog open={tagFormatDialogOpen && !!selectedCategoryForTag} onOpenChange={open => {
+      setTagFormatDialogOpen(open);
+      if (!open) setSelectedCategoryForTag(null);
+    }} category={selectedCategoryForTag} existingFormat={selectedCategoryForTag ? categoryFormats[`format_${selectedCategoryForTag.id}`] : null} />
+    </div>;
 }
