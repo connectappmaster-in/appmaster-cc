@@ -24,6 +24,7 @@ import { EditCategoryDialog } from "@/components/ITAM/EditCategoryDialog";
 import { EditDepartmentDialog } from "@/components/ITAM/EditDepartmentDialog";
 import { EditMakeDialog } from "@/components/ITAM/EditMakeDialog";
 import { DeleteConfirmDialog } from "@/components/ITAM/DeleteConfirmDialog";
+import { CategoryTagFormatDialog } from "@/components/ITAM/CategoryTagFormatDialog";
 export default function FieldsSetupPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -57,6 +58,12 @@ export default function FieldsSetupPage() {
   const [selectedDepartment, setSelectedDepartment] = useState<any | null>(null);
   const [selectedMake, setSelectedMake] = useState<any | null>(null);
   const [deleteItem, setDeleteItem] = useState<any | null>(null);
+  
+  // Tag format dialog for categories
+  const [tagFormatDialogOpen, setTagFormatDialogOpen] = useState(false);
+  const [selectedCategoryForTag, setSelectedCategoryForTag] = useState<any | null>(null);
+  const [categoryFormats, setCategoryFormats] = useState<any>({});
+  
   // Automatically calculate padding length from starting number
   const tagPaddingLength = tagStartNumber.length || 4;
 
@@ -67,6 +74,25 @@ export default function FieldsSetupPage() {
       setTagStartNumber(existingTagFormat.start_number || "0001");
     }
   }, [existingTagFormat]);
+
+  // Load category tag formats
+  useEffect(() => {
+    const loadCategoryFormats = async () => {
+      const { data } = await supabase
+        .from('category_tag_formats')
+        .select('*');
+      
+      if (data) {
+        const formats: any = {};
+        data.forEach((format) => {
+          formats[`format_${format.category_id}`] = format;
+        });
+        setCategoryFormats(formats);
+      }
+    };
+    
+    loadCategoryFormats();
+  }, []);
 
   const saveTagFormat = useMutation({
     mutationFn: async () => {
@@ -472,50 +498,56 @@ export default function FieldsSetupPage() {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Hash className="h-4 w-4" />
-                  Asset Tag Format
+                  Asset Tag Format by Category
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Configure how asset tags are generated
+                  Configure unique tag format for each category
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="tag-prefix">Prefix</Label>
-                    <Input
-                      id="tag-prefix"
-                      value={tagPrefix}
-                      onChange={(e) => setTagPrefix(e.target.value)}
-                      placeholder="e.g., RT-, IT-, AS-"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tag-start">Starting Number</Label>
-                    <Input
-                      id="tag-start"
-                      value={tagStartNumber}
-                      onChange={(e) => setTagStartNumber(e.target.value)}
-                      placeholder="e.g., 0001, 0100, 5000"
-                    />
-                  </div>
-                </div>
-                <div className="p-4 bg-muted rounded-md">
-                  <div className="text-sm font-medium mb-2">Preview:</div>
-                  <div className="text-lg font-mono">
-                    {tagPrefix}{tagStartNumber}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Padding Length: {tagPaddingLength} digits
-                  </div>
-                </div>
-                <Button 
-                  size="sm" 
-                  onClick={() => saveTagFormat.mutate()}
-                  disabled={saveTagFormat.isPending}
-                >
-                  {saveTagFormat.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Save Tag Format
-                </Button>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>CATEGORY</TableHead>
+                      <TableHead>PREFIX</TableHead>
+                      <TableHead>NEXT NUMBER</TableHead>
+                      <TableHead>SAMPLE TAG</TableHead>
+                      <TableHead className="text-right">ACTIONS</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {categories.map((category) => {
+                      const formatKey = `format_${category.id}`;
+                      const format = categoryFormats[formatKey];
+                      const prefix = format?.prefix || '-';
+                      const nextNum = format?.current_number || 1;
+                      const padding = format?.zero_padding || 2;
+                      const sampleTag = format ? `${prefix}${nextNum.toString().padStart(padding, '0')}` : 'Not Configured';
+                      
+                      return (
+                        <TableRow key={category.id}>
+                          <TableCell className="font-medium">{category.name}</TableCell>
+                          <TableCell>{prefix}</TableCell>
+                          <TableCell>{format ? nextNum.toString().padStart(padding, '0') : '-'}</TableCell>
+                          <TableCell className="font-mono text-sm">{sampleTag}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => {
+                                setSelectedCategoryForTag(category);
+                                setTagFormatDialogOpen(true);
+                              }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
@@ -577,6 +609,16 @@ export default function FieldsSetupPage() {
           if (!open) setDeleteItem(null);
         }}
         item={deleteItem}
+      />
+
+      <CategoryTagFormatDialog
+        open={tagFormatDialogOpen && !!selectedCategoryForTag}
+        onOpenChange={(open) => {
+          setTagFormatDialogOpen(open);
+          if (!open) setSelectedCategoryForTag(null);
+        }}
+        category={selectedCategoryForTag}
+        existingFormat={selectedCategoryForTag ? categoryFormats[`format_${selectedCategoryForTag.id}`] : null}
       />
     </div>
   );

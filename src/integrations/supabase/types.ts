@@ -1016,6 +1016,57 @@ export type Database = {
         }
         Relationships: []
       }
+      category_tag_formats: {
+        Row: {
+          category_id: number
+          created_at: string | null
+          current_number: number
+          id: string
+          organisation_id: string | null
+          prefix: string
+          tenant_id: number
+          updated_at: string | null
+          zero_padding: number
+        }
+        Insert: {
+          category_id: number
+          created_at?: string | null
+          current_number?: number
+          id?: string
+          organisation_id?: string | null
+          prefix: string
+          tenant_id: number
+          updated_at?: string | null
+          zero_padding?: number
+        }
+        Update: {
+          category_id?: number
+          created_at?: string | null
+          current_number?: number
+          id?: string
+          organisation_id?: string | null
+          prefix?: string
+          tenant_id?: number
+          updated_at?: string | null
+          zero_padding?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_tag_formats_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "itam_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "category_tag_formats_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       change_approvals: {
         Row: {
           approver_id: string
