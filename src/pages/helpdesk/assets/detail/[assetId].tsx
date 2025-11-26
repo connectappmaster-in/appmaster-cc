@@ -198,6 +198,12 @@ const AssetDetail = () => {
           notes: "Asset checked in"
         });
         break;
+      case "check_out":
+        updateAssetStatus.mutate({
+          status: "assigned",
+          notes: "Asset checked out"
+        });
+        break;
       case "lost":
         updateAssetStatus.mutate({
           status: "lost",
@@ -301,9 +307,15 @@ const AssetDetail = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleAction("check_in")}>
-                  Check in
-                </DropdownMenuItem>
+                {asset.status === "available" ? (
+                  <DropdownMenuItem onClick={() => handleAction("check_out")}>
+                    Check Out
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={() => handleAction("check_in")}>
+                    Check In
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => handleAction("lost")}>
                   Lost
                 </DropdownMenuItem>
