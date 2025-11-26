@@ -41,7 +41,13 @@ export const CreateAssetDialog = ({
   const queryClient = useQueryClient();
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
   const [isGeneratingId, setIsGeneratingId] = useState(false);
-  const { sites, locations, categories, departments, makes } = useAssetSetupConfig();
+  const {
+    sites,
+    locations,
+    categories,
+    departments,
+    makes
+  } = useAssetSetupConfig();
   const form = useForm<z.infer<typeof assetSchema>>({
     resolver: zodResolver(assetSchema),
     defaultValues: {
@@ -69,42 +75,32 @@ export const CreateAssetDialog = ({
       fetchNextAssetId();
     }
   }, [open]);
-
   const generateFallbackAssetId = async (): Promise<string> => {
     // Fallback: Get the last asset ID from the database and increment
-    const { data: userData } = await supabase
-      .from('users')
-      .select('organisation_id')
-      .eq('auth_user_id', (await supabase.auth.getUser()).data.user?.id)
-      .single();
-
+    const {
+      data: userData
+    } = await supabase.from('users').select('organisation_id').eq('auth_user_id', (await supabase.auth.getUser()).data.user?.id).single();
     if (!userData?.organisation_id) {
       return `AS-${Date.now().toString().slice(-6)}`;
     }
 
     // Get tag format
-    const { data: tagFormat } = await supabase
-      .from('itam_tag_format')
-      .select('prefix, padding_length, start_number')
-      .eq('organisation_id', userData.organisation_id)
-      .maybeSingle();
-
+    const {
+      data: tagFormat
+    } = await supabase.from('itam_tag_format').select('prefix, padding_length, start_number').eq('organisation_id', userData.organisation_id).maybeSingle();
     const prefix = tagFormat?.prefix || 'AS-';
     // Prefer start_number length, then padding_length, then default
     const paddingLength = (tagFormat?.start_number?.length ?? 0) || tagFormat?.padding_length || 4;
-
     const startNumberRaw = tagFormat?.start_number || '1';
     const parsedStart = parseInt(startNumberRaw, 10);
     const effectiveStart = Number.isNaN(parsedStart) ? 1 : parsedStart;
 
     // Get the highest existing asset ID
-    const { data: assets } = await supabase
-      .from('itam_assets')
-      .select('asset_id')
-      .eq('organisation_id', userData.organisation_id)
-      .order('created_at', { ascending: false })
-      .limit(50);
-
+    const {
+      data: assets
+    } = await supabase.from('itam_assets').select('asset_id').eq('organisation_id', userData.organisation_id).order('created_at', {
+      ascending: false
+    }).limit(50);
     let maxNumber = 0;
     if (assets && assets.length > 0) {
       assets.forEach(asset => {
@@ -117,19 +113,19 @@ export const CreateAssetDialog = ({
         }
       });
     }
-
     const candidateNext = maxNumber > 0 ? maxNumber + 1 : effectiveStart;
     const nextNumber = Math.max(candidateNext, effectiveStart);
     const paddedNumber = nextNumber.toString().padStart(paddingLength, '0');
     return `${prefix}${paddedNumber}`;
   };
-
   const fetchNextAssetId = async () => {
     setIsGeneratingId(true);
     try {
       // Try to use the edge function first
-      const { data, error } = await supabase.functions.invoke('get-next-asset-id');
-      
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('get-next-asset-id');
       if (error || !data?.assetId) {
         console.log('Edge function not available, using fallback method');
         // Fallback to client-side generation
@@ -147,20 +143,16 @@ export const CreateAssetDialog = ({
       setIsGeneratingId(false);
     }
   };
-
   const validateAssetIdUniqueness = async (assetId: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase
-        .from('itam_assets')
-        .select('asset_id')
-        .eq('asset_id', assetId)
-        .maybeSingle();
-
+      const {
+        data,
+        error
+      } = await supabase.from('itam_assets').select('asset_id').eq('asset_id', assetId).maybeSingle();
       if (error) {
         console.error('Error validating asset ID:', error);
         return true; // Allow submission if validation fails
       }
-
       return !data; // Return true if asset_id doesn't exist (unique)
     } catch (error) {
       console.error('Error:', error);
@@ -243,7 +235,6 @@ export const CreateAssetDialog = ({
   const onSubmit = async (values: z.infer<typeof assetSchema>) => {
     // Validate asset ID uniqueness before submitting
     const isUnique = await validateAssetIdUniqueness(values.asset_id);
-    
     if (!isUnique) {
       form.setError('asset_id', {
         type: 'manual',
@@ -252,7 +243,6 @@ export const CreateAssetDialog = ({
       toast.error('Asset ID already exists. Please use a unique ID.');
       return;
     }
-
     createAsset.mutate(values);
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
@@ -273,24 +263,10 @@ export const CreateAssetDialog = ({
                       <FormLabel className="text-xs">Asset ID *</FormLabel>
                       <div className="flex gap-2">
                         <FormControl>
-                          <Input 
-                            className="h-8" 
-                            {...field}
-                            placeholder="Auto-generated ID" 
-                          />
+                          <Input className="h-8" {...field} placeholder="Auto-generated ID" />
                         </FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={fetchNextAssetId}
-                          disabled={isGeneratingId}
-                        >
-                          {isGeneratingId ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <RefreshCw className="h-4 w-4" />
-                          )}
+                        <Button type="button" variant="outline" size="sm" onClick={fetchNextAssetId} disabled={isGeneratingId}>
+                          {isGeneratingId ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                         </Button>
                       </div>
                       <FormMessage />
@@ -307,11 +283,9 @@ export const CreateAssetDialog = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {makes.map((make) => (
-                            <SelectItem key={make.id} value={make.name}>
+                          {makes.map(make => <SelectItem key={make.id} value={make.name}>
                               {make.name}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -435,11 +409,9 @@ export const CreateAssetDialog = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {sites.map((site) => (
-                            <SelectItem key={site.id} value={site.name}>
+                          {sites.map(site => <SelectItem key={site.id} value={site.name}>
                               {site.name}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -456,11 +428,9 @@ export const CreateAssetDialog = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {locations.map((location) => (
-                            <SelectItem key={location.id} value={location.name}>
+                          {locations.map(location => <SelectItem key={location.id} value={location.name}>
                               {location.name}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -477,11 +447,9 @@ export const CreateAssetDialog = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.name}>
+                          {categories.map(category => <SelectItem key={category.id} value={category.name}>
                               {category.name}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -498,11 +466,9 @@ export const CreateAssetDialog = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {departments.map((dept) => (
-                            <SelectItem key={dept.id} value={dept.name}>
+                          {departments.map(dept => <SelectItem key={dept.id} value={dept.name}>
                               {dept.name}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -519,32 +485,16 @@ export const CreateAssetDialog = ({
                     <FormLabel className="text-xs">Image</FormLabel>
                     <div className="flex gap-2">
                       <FormControl>
-                        <Input 
-                          type="text" 
-                          className="h-8" 
-                          placeholder="Image URL or click Browse to select"
-                          {...field} 
-                        />
+                        
                       </FormControl>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setImagePickerOpen(true)}
-                      >
+                      <Button type="button" variant="outline" size="sm" onClick={() => setImagePickerOpen(true)}>
                         <ImagePlus className="h-4 w-4 mr-1" />
                         Browse
                       </Button>
                     </div>
-                    {field.value && (
-                      <div className="mt-2 relative w-32 h-32 rounded-md border overflow-hidden">
-                        <img 
-                          src={field.value} 
-                          alt="Preview" 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
+                    {field.value && <div className="mt-2 relative w-32 h-32 rounded-md border overflow-hidden">
+                        <img src={field.value} alt="Preview" className="w-full h-full object-cover" />
+                      </div>}
                     <FormMessage />
                   </FormItem>} />
             </div>
@@ -561,12 +511,7 @@ export const CreateAssetDialog = ({
           </form>
         </Form>
 
-        <ImagePickerDialog
-          open={imagePickerOpen}
-          onOpenChange={setImagePickerOpen}
-          onImageSelect={(url) => form.setValue("photo_url", url)}
-          currentImage={form.watch("photo_url")}
-        />
+        <ImagePickerDialog open={imagePickerOpen} onOpenChange={setImagePickerOpen} onImageSelect={url => form.setValue("photo_url", url)} currentImage={form.watch("photo_url")} />
       </DialogContent>
     </Dialog>;
 };
