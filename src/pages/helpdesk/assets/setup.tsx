@@ -17,24 +17,6 @@ export default function AssetSetup() {
     onClick: () => navigate("/helpdesk/assets/depreciation"),
     category: "Core Configuration"
   }, {
-    title: "Vendors Management",
-    description: "Manage suppliers and service providers",
-    icon: Building2,
-    onClick: () => navigate("/helpdesk/assets/vendors"),
-    category: "Vendor & Procurement"
-  }, {
-    title: "Purchase Orders",
-    description: "Configure purchase order workflow",
-    icon: ShoppingCart,
-    onClick: () => navigate("/helpdesk/assets/purchase-orders"),
-    category: "Vendor & Procurement"
-  }, {
-    title: "License Management",
-    description: "Software licenses and allocations",
-    icon: FileKey,
-    onClick: () => navigate("/helpdesk/assets/licenses"),
-    category: "Software Management"
-  }, {
     title: "Repairs & Maintenance",
     description: "Asset repair and maintenance tracking",
     icon: Wrench,
