@@ -160,16 +160,15 @@ export default function HelpdeskAssets() {
       <div className="px-3 space-y-3 mt-2">
         {/* Quick Actions Row */}
         <div className="flex gap-2 flex-wrap">
-          <Button size="sm" onClick={() => setCreateDialogOpen(true)} className="gap-1.5 h-8">
-            <Plus className="h-3.5 w-3.5" />
-            <span className="text-sm">Add Asset</span>
-          </Button>
-          
           <Button size="sm" variant="outline" onClick={() => navigate("/helpdesk/assets/allassets?status=available")}>
             <CheckCircle className="w-4 h-4 mr-1" />
             Available
           </Button>
           
+          <Button size="sm" onClick={() => setCreateDialogOpen(true)} className="gap-1.5 h-8 ml-auto">
+            <Plus className="h-3.5 w-3.5" />
+            <span className="text-sm">Add Asset</span>
+          </Button>
         </div>
 
         {/* KPI Cards Grid */}
