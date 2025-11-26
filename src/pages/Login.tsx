@@ -35,21 +35,16 @@ const Login = () => {
 
   // Check if email exists using edge function (admin API)
   const checkEmailExists = async (emailToCheck: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke("check-user-exists", {
-        body: { email: emailToCheck },
-      });
+    const { data, error } = await supabase.functions.invoke("check-user-exists", {
+      body: { email: emailToCheck },
+    });
 
-      if (error) {
-        console.error("Failed to check email existence", error);
-        return false;
-      }
-
-      return Boolean((data as any)?.exists);
-    } catch (error) {
-      console.error("Error in checkEmailExists:", error);
-      return false;
+    if (error) {
+      console.error("Failed to check email existence", error);
+      throw error;
     }
+
+    return Boolean((data as any)?.exists);
   };
 
   const handleEmailNext = async (e: React.FormEvent) => {
