@@ -85,12 +85,13 @@ export const CreateAssetDialog = ({
     // Get tag format
     const { data: tagFormat } = await supabase
       .from('itam_tag_format')
-      .select('prefix, padding_length')
+      .select('prefix, padding_length, start_number')
       .eq('organisation_id', userData.organisation_id)
       .maybeSingle();
 
     const prefix = tagFormat?.prefix || 'AS-';
-    const paddingLength = tagFormat?.padding_length || 6;
+    // Use padding_length from database, or calculate from start_number, or default to 4
+    const paddingLength = tagFormat?.padding_length || tagFormat?.start_number?.length || 4;
 
     // Get the highest existing asset ID
     const { data: assets } = await supabase

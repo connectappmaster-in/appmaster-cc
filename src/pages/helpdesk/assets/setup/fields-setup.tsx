@@ -22,14 +22,15 @@ export default function FieldsSetupPage() {
   
   const [tagPrefix, setTagPrefix] = useState("");
   const [tagStartNumber, setTagStartNumber] = useState("");
-  const [tagPaddingLength, setTagPaddingLength] = useState(6);
+
+  // Automatically calculate padding length from starting number
+  const tagPaddingLength = tagStartNumber.length || 4;
 
   // Load existing tag format when it's available
   useEffect(() => {
     if (existingTagFormat) {
       setTagPrefix(existingTagFormat.prefix || "AS-");
       setTagStartNumber(existingTagFormat.start_number || "0001");
-      setTagPaddingLength(existingTagFormat.padding_length || 6);
     }
   }, [existingTagFormat]);
 
@@ -53,6 +54,9 @@ export default function FieldsSetupPage() {
         .eq("organisation_id", userData.organisation_id)
         .maybeSingle();
 
+      // Calculate padding length from starting number length
+      const calculatedPaddingLength = tagStartNumber.length || 4;
+
       if (existing) {
         // Update existing
         const { error } = await supabase
@@ -60,7 +64,7 @@ export default function FieldsSetupPage() {
           .update({
             prefix: tagPrefix,
             start_number: tagStartNumber,
-            padding_length: tagPaddingLength,
+            padding_length: calculatedPaddingLength,
           })
           .eq("id", existing.id);
 
@@ -73,7 +77,7 @@ export default function FieldsSetupPage() {
             organisation_id: userData.organisation_id,
             prefix: tagPrefix,
             start_number: tagStartNumber,
-            padding_length: tagPaddingLength,
+            padding_length: calculatedPaddingLength,
             auto_increment: true,
           });
 
@@ -353,6 +357,9 @@ export default function FieldsSetupPage() {
                   <div className="text-sm font-medium mb-2">Preview:</div>
                   <div className="text-lg font-mono">
                     {tagPrefix}{tagStartNumber}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-2">
+                    Padding Length: {tagPaddingLength} digits
                   </div>
                 </div>
                 <Button 
