@@ -158,10 +158,7 @@ export default function HelpdeskAssets() {
       <div className="px-3 space-y-3 mt-2">
         {/* Quick Actions Row */}
         <div className="flex gap-2 flex-wrap">
-          <Button size="sm" onClick={() => navigate("/helpdesk/assets/allassets")}>
-            <Plus className="w-4 h-4 mr-1" />
-            Add Asset
-          </Button>
+          
           
           <Button size="sm" variant="outline" onClick={() => navigate("/helpdesk/assets/allassets?status=available")}>
             <CheckCircle className="w-4 h-4 mr-1" />
@@ -328,11 +325,7 @@ export default function HelpdeskAssets() {
                 </Button>
               </div>
               <div className="space-y-1">
-                {recentEvents.slice(0, 5).map((event: any) => <div 
-                    key={event.id} 
-                    className="flex items-center justify-between py-1.5 border-b last:border-0 cursor-pointer hover:bg-accent/50 rounded px-2 -mx-2"
-                    onClick={() => navigate(`/helpdesk/assets/detail/${event.asset_id}`)}
-                  >
+                {recentEvents.slice(0, 5).map((event: any) => <div key={event.id} className="flex items-center justify-between py-1.5 border-b last:border-0 cursor-pointer hover:bg-accent/50 rounded px-2 -mx-2" onClick={() => navigate(`/helpdesk/assets/detail/${event.asset_id}`)}>
                     <div className="flex-1">
                       <p className="text-sm font-medium">{event.itam_assets?.asset_tag || 'N/A'}</p>
                       <p className="text-xs text-muted-foreground">{event.event_type} • {event.itam_assets?.name}</p>
