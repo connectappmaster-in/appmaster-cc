@@ -18,7 +18,12 @@ import { AddLocationDialog } from "@/components/ITAM/AddLocationDialog";
 import { AddCategoryDialog } from "@/components/ITAM/AddCategoryDialog";
 import { AddDepartmentDialog } from "@/components/ITAM/AddDepartmentDialog";
 import { AddMakeDialog } from "@/components/ITAM/AddMakeDialog";
+import { EditSiteDialog } from "@/components/ITAM/EditSiteDialog";
+import { EditLocationDialog } from "@/components/ITAM/EditLocationDialog";
 import { EditCategoryDialog } from "@/components/ITAM/EditCategoryDialog";
+import { EditDepartmentDialog } from "@/components/ITAM/EditDepartmentDialog";
+import { EditMakeDialog } from "@/components/ITAM/EditMakeDialog";
+import { DeleteConfirmDialog } from "@/components/ITAM/DeleteConfirmDialog";
 export default function FieldsSetupPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -34,8 +39,24 @@ export default function FieldsSetupPage() {
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [departmentDialogOpen, setDepartmentDialogOpen] = useState(false);
   const [makeDialogOpen, setMakeDialogOpen] = useState(false);
+  
+  // Edit dialog states
+  const [editSiteDialogOpen, setEditSiteDialogOpen] = useState(false);
+  const [editLocationDialogOpen, setEditLocationDialogOpen] = useState(false);
   const [editCategoryDialogOpen, setEditCategoryDialogOpen] = useState(false);
+  const [editDepartmentDialogOpen, setEditDepartmentDialogOpen] = useState(false);
+  const [editMakeDialogOpen, setEditMakeDialogOpen] = useState(false);
+  
+  // Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  
+  // Selected items
+  const [selectedSite, setSelectedSite] = useState<any | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<any | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
+  const [selectedDepartment, setSelectedDepartment] = useState<any | null>(null);
+  const [selectedMake, setSelectedMake] = useState<any | null>(null);
+  const [deleteItem, setDeleteItem] = useState<any | null>(null);
   // Automatically calculate padding length from starting number
   const tagPaddingLength = tagStartNumber.length || 4;
 
@@ -160,8 +181,27 @@ export default function FieldsSetupPage() {
                           <Badge variant="secondary">Active</Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => {
+                              setSelectedSite(site);
+                              setEditSiteDialogOpen(true);
+                            }}
+                          >
                             <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => {
+                              setDeleteItem({ ...site, type: 'site' });
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -203,8 +243,27 @@ export default function FieldsSetupPage() {
                         <TableCell className="font-medium">{location.name}</TableCell>
                         <TableCell>{(location as any).itam_sites?.name || "—"}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => {
+                              setSelectedLocation(location);
+                              setEditLocationDialogOpen(true);
+                            }}
+                          >
                             <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => {
+                              setDeleteItem({ ...location, type: 'location' });
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -259,6 +318,17 @@ export default function FieldsSetupPage() {
                           >
                             <Pencil className="h-3 w-3" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => {
+                              setDeleteItem({ ...category, type: 'category' });
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -301,8 +371,27 @@ export default function FieldsSetupPage() {
                           <Badge variant="secondary">Active</Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => {
+                              setSelectedDepartment(dept);
+                              setEditDepartmentDialogOpen(true);
+                            }}
+                          >
                             <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => {
+                              setDeleteItem({ ...dept, type: 'department' });
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -346,8 +435,27 @@ export default function FieldsSetupPage() {
                           <Badge variant="secondary">Active</Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => {
+                              setSelectedMake(make);
+                              setEditMakeDialogOpen(true);
+                            }}
+                          >
                             <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => {
+                              setDeleteItem({ ...make, type: 'make' });
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -418,6 +526,25 @@ export default function FieldsSetupPage() {
       <AddSiteDialog open={siteDialogOpen} onOpenChange={setSiteDialogOpen} />
       <AddLocationDialog open={locationDialogOpen} onOpenChange={setLocationDialogOpen} />
       <AddCategoryDialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen} />
+      <AddDepartmentDialog open={departmentDialogOpen} onOpenChange={setDepartmentDialogOpen} />
+      <AddMakeDialog open={makeDialogOpen} onOpenChange={setMakeDialogOpen} />
+      
+      <EditSiteDialog
+        open={editSiteDialogOpen && !!selectedSite}
+        onOpenChange={(open) => {
+          setEditSiteDialogOpen(open);
+          if (!open) setSelectedSite(null);
+        }}
+        site={selectedSite}
+      />
+      <EditLocationDialog
+        open={editLocationDialogOpen && !!selectedLocation}
+        onOpenChange={(open) => {
+          setEditLocationDialogOpen(open);
+          if (!open) setSelectedLocation(null);
+        }}
+        location={selectedLocation}
+      />
       <EditCategoryDialog
         open={editCategoryDialogOpen && !!selectedCategory}
         onOpenChange={(open) => {
@@ -426,8 +553,31 @@ export default function FieldsSetupPage() {
         }}
         category={selectedCategory}
       />
-      <AddDepartmentDialog open={departmentDialogOpen} onOpenChange={setDepartmentDialogOpen} />
-      <AddMakeDialog open={makeDialogOpen} onOpenChange={setMakeDialogOpen} />
+      <EditDepartmentDialog
+        open={editDepartmentDialogOpen && !!selectedDepartment}
+        onOpenChange={(open) => {
+          setEditDepartmentDialogOpen(open);
+          if (!open) setSelectedDepartment(null);
+        }}
+        department={selectedDepartment}
+      />
+      <EditMakeDialog
+        open={editMakeDialogOpen && !!selectedMake}
+        onOpenChange={(open) => {
+          setEditMakeDialogOpen(open);
+          if (!open) setSelectedMake(null);
+        }}
+        make={selectedMake}
+      />
+      
+      <DeleteConfirmDialog
+        open={deleteDialogOpen && !!deleteItem}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) setDeleteItem(null);
+        }}
+        item={deleteItem}
+      />
     </div>
   );
 }
