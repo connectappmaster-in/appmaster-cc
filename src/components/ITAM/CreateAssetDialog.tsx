@@ -257,6 +257,25 @@ export const CreateAssetDialog = ({
             <div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <FormField control={form.control} name="category" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel className="text-xs">Category *</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map(category => <SelectItem key={category.id} value={category.name}>
+                              {category.name}
+                            </SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>} />
+
                 <FormField control={form.control} name="asset_id" render={({
                 field
               }) => <FormItem>
@@ -405,25 +424,6 @@ export const CreateAssetDialog = ({
                         <SelectContent>
                           {locations.map(location => <SelectItem key={location.id} value={location.name}>
                               {location.name}
-                            </SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>} />
-
-                <FormField control={form.control} name="category" render={({
-                field
-              }) => <FormItem>
-                      <FormLabel className="text-xs">Category *</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger className="h-8">
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map(category => <SelectItem key={category.id} value={category.name}>
-                              {category.name}
                             </SelectItem>)}
                         </SelectContent>
                       </Select>
