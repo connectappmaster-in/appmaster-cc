@@ -33,21 +33,40 @@ const Login = () => {
     }
   }, []);
 
-  // Check if email exists in the database
+  // Check if email exists using auth API
   const checkEmailExists = async (emailToCheck: string) => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', emailToCheck)
-        .maybeSingle();
+      // Use signInWithPassword with a dummy password to check if user exists
+      // The error message will tell us if the email exists or not
+      const { error } = await supabase.auth.signInWithPassword({
+        email: emailToCheck,
+        password: '___dummy_check_password_xyz123___',
+      });
 
-      if (error) {
-        console.error("Error checking email:", error);
-        return false;
+      if (!error) {
+        // This shouldn't happen with a dummy password, but if it does, user exists
+        return true;
       }
 
-      return data !== null;
+      // Check error message to determine if user exists
+      const errorMsg = error.message.toLowerCase();
+      
+      // These error messages indicate the user EXISTS but password is wrong
+      if (errorMsg.includes('invalid login credentials') || 
+          errorMsg.includes('invalid password') ||
+          errorMsg.includes('email not confirmed')) {
+        return true;
+      }
+      
+      // These indicate user doesn't exist
+      if (errorMsg.includes('user not found') || 
+          errorMsg.includes('no user found') ||
+          errorMsg.includes('invalid email')) {
+        return false;
+      }
+      
+      // For any other error, assume user doesn't exist to be safe
+      return false;
     } catch (error) {
       console.error("Error in checkEmailExists:", error);
       return false;
