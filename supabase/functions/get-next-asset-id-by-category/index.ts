@@ -88,31 +88,38 @@ serve(async (req) => {
       );
     }
 
-    // Calculate next asset ID
-    const nextNumber = tagFormat.current_number;
+    // Calculate next asset ID and find unique one
+    let currentNumber = tagFormat.current_number;
     const paddingLength = tagFormat.zero_padding || 2;
-    const paddedNumber = nextNumber.toString().padStart(paddingLength, '0');
-    const nextAssetId = `${tagFormat.prefix}${paddedNumber}`;
+    let nextAssetId = '';
+    let isUnique = false;
+    const maxAttempts = 1000; // Prevent infinite loop
+    let attempts = 0;
 
-    // Check for uniqueness
-    const { data: existingAsset } = await supabaseClient
-      .from('itam_assets')
-      .select('id')
-      .eq('asset_id', nextAssetId)
-      .maybeSingle();
+    // Keep incrementing until we find a unique ID
+    while (!isUnique && attempts < maxAttempts) {
+      const paddedNumber = currentNumber.toString().padStart(paddingLength, '0');
+      nextAssetId = `${tagFormat.prefix}${paddedNumber}`;
 
-    if (existingAsset) {
-      // If duplicate found, increment and try again
-      const incrementedNumber = nextNumber + 1;
-      const incrementedPadded = incrementedNumber.toString().padStart(paddingLength, '0');
-      const incrementedAssetId = `${tagFormat.prefix}${incrementedPadded}`;
+      // Check if this ID exists
+      const { data: existingAsset } = await supabaseClient
+        .from('itam_assets')
+        .select('id')
+        .eq('asset_id', nextAssetId)
+        .maybeSingle();
 
+      if (!existingAsset) {
+        isUnique = true;
+      } else {
+        currentNumber++;
+        attempts++;
+      }
+    }
+
+    if (!isUnique) {
       return new Response(
-        JSON.stringify({ 
-          assetId: incrementedAssetId,
-          warning: 'Expected ID was already in use. Generated next available ID.'
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Could not generate unique asset ID after maximum attempts' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
