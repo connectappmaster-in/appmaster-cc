@@ -35,6 +35,8 @@ import DepreciationDashboard from "./pages/helpdesk/assets/depreciation/index";
 import VendorsList from "./pages/helpdesk/assets/vendors/index";
 import LicensesList from "./pages/helpdesk/assets/licenses/index";
 import RepairsList from "./pages/helpdesk/assets/repairs/index";
+import CreateRepair from "./pages/helpdesk/assets/repairs/create";
+import RepairDetail from "./pages/helpdesk/assets/repairs/detail/[repairId]";
 // Assets Explore imports
 import AssetsBulkActions from "./pages/helpdesk/assets/explore/bulk-actions";
 import AssetsReports from "./pages/helpdesk/assets/explore/reports";
@@ -200,6 +202,8 @@ const App = () => {
             <Route path="assets/vendors" element={<VendorsList />} />
             <Route path="assets/licenses" element={<LicensesList />} />
             <Route path="assets/repairs" element={<RepairsList />} />
+            <Route path="assets/repairs/create" element={<CreateRepair />} />
+            <Route path="assets/repairs/detail/:repairId" element={<RepairDetail />} />
             <Route path="assets/setup/fields-setup" element={<AssetsFieldsSetup />} />
             <Route path="subscription" element={<HelpdeskSubscriptionLayout />}>
               <Route index element={<HelpdeskSubscriptionDashboard />} />
