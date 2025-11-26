@@ -295,54 +295,57 @@ export default function HelpdeskAssets() {
           </Card>
         </div>
 
-        {/* Depreciation Summary */}
-        <Card className="cursor-pointer hover:shadow-sm transition-shadow hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/depreciation/reports")}>
-          <CardContent className="p-3">
-            <h3 className="text-sm font-semibold mb-2">Depreciation Summary</h3>
-            <div className="space-y-2">
-              <div>
-                <p className="text-xs text-muted-foreground">Total Value</p>
-                <p className="text-lg font-bold">₹{(metrics.totalValue / 100000).toFixed(2)}L</p>
+        {/* Depreciation Summary and Recent Activity */}
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-2">
+          {/* Depreciation Summary */}
+          <Card className="cursor-pointer hover:shadow-sm transition-shadow hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/depreciation/reports")}>
+            <CardContent className="p-3">
+              <h3 className="text-sm font-semibold mb-2">Depreciation Summary</h3>
+              <div className="space-y-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Value</p>
+                  <p className="text-lg font-bold">₹{(metrics.totalValue / 100000).toFixed(2)}L</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Depreciation</p>
+                  <p className="text-lg font-bold text-orange-500">₹{(metrics.totalDepreciation / 100000).toFixed(2)}L</p>
+                </div>
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-muted-foreground">Net Book Value</p>
+                  <p className="text-xl font-bold text-green-500">₹{(metrics.netBookValue / 100000).toFixed(2)}L</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Total Depreciation</p>
-                <p className="text-lg font-bold text-orange-500">₹{(metrics.totalDepreciation / 100000).toFixed(2)}L</p>
-              </div>
-              <div className="pt-2 border-t">
-                <p className="text-xs text-muted-foreground">Net Book Value</p>
-                <p className="text-xl font-bold text-green-500">₹{(metrics.netBookValue / 100000).toFixed(2)}L</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Recent Activity */}
-        <Card>
-          <CardContent className="p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold">Recent Activity</h3>
-              <Button size="sm" variant="ghost" onClick={() => navigate("/helpdesk/assets/audit")}>
-                View All
-              </Button>
-            </div>
-            <div className="space-y-1">
-              {recentEvents.slice(0, 5).map((event: any) => <div 
-                  key={event.id} 
-                  className="flex items-center justify-between py-1.5 border-b last:border-0 cursor-pointer hover:bg-accent/50 rounded px-2 -mx-2"
-                  onClick={() => navigate(`/helpdesk/assets/detail/${event.asset_id}`)}
-                >
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{event.itam_assets?.asset_tag || 'N/A'}</p>
-                    <p className="text-xs text-muted-foreground">{event.event_type} • {event.itam_assets?.name}</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(event.created_at).toLocaleDateString()}
-                  </p>
-                </div>)}
-              {recentEvents.length === 0 && <p className="text-sm text-muted-foreground text-center py-3">No recent activity</p>}
-            </div>
-          </CardContent>
-        </Card>
+          {/* Recent Activity */}
+          <Card>
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold">Recent Activity</h3>
+                <Button size="sm" variant="ghost" onClick={() => navigate("/helpdesk/assets/audit")}>
+                  View All
+                </Button>
+              </div>
+              <div className="space-y-1">
+                {recentEvents.slice(0, 5).map((event: any) => <div 
+                    key={event.id} 
+                    className="flex items-center justify-between py-1.5 border-b last:border-0 cursor-pointer hover:bg-accent/50 rounded px-2 -mx-2"
+                    onClick={() => navigate(`/helpdesk/assets/detail/${event.asset_id}`)}
+                  >
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{event.itam_assets?.asset_tag || 'N/A'}</p>
+                      <p className="text-xs text-muted-foreground">{event.event_type} • {event.itam_assets?.name}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(event.created_at).toLocaleDateString()}
+                    </p>
+                  </div>)}
+                {recentEvents.length === 0 && <p className="text-sm text-muted-foreground text-center py-3">No recent activity</p>}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>;
 }
