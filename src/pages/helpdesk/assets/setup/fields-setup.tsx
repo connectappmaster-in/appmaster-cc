@@ -8,20 +8,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Building2, MapPin, FolderTree, Briefcase, Hash, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, MapPin, FolderTree, Briefcase, Hash, Loader2, Package } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAssetSetupConfig } from "@/hooks/useAssetSetupConfig";
+import { AddSiteDialog } from "@/components/ITAM/AddSiteDialog";
+import { AddLocationDialog } from "@/components/ITAM/AddLocationDialog";
+import { AddCategoryDialog } from "@/components/ITAM/AddCategoryDialog";
+import { AddDepartmentDialog } from "@/components/ITAM/AddDepartmentDialog";
+import { AddMakeDialog } from "@/components/ITAM/AddMakeDialog";
 
 export default function FieldsSetupPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("tag-format");
-  const { sites, locations, categories, departments, tagFormat: existingTagFormat } = useAssetSetupConfig();
+  const { sites, locations, categories, departments, makes, tagFormat: existingTagFormat } = useAssetSetupConfig();
   
   const [tagPrefix, setTagPrefix] = useState("");
   const [tagStartNumber, setTagStartNumber] = useState("");
+
+  // Dialog states
+  const [siteDialogOpen, setSiteDialogOpen] = useState(false);
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [departmentDialogOpen, setDepartmentDialogOpen] = useState(false);
+  const [makeDialogOpen, setMakeDialogOpen] = useState(false);
 
   // Automatically calculate padding length from starting number
   const tagPaddingLength = tagStartNumber.length || 4;
@@ -106,41 +118,13 @@ export default function FieldsSetupPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-6 w-full">
-            <TabsTrigger value="company">Company</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="locations">Locations</TabsTrigger>
             <TabsTrigger value="categories">Categories</TabsTrigger>
             <TabsTrigger value="departments">Departments</TabsTrigger>
+            <TabsTrigger value="makes">Makes</TabsTrigger>
             <TabsTrigger value="tag-format">Tag Format</TabsTrigger>
           </TabsList>
-
-          {/* Company Info */}
-          <TabsContent value="company" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  Company Information
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  Update your company profile
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="company-name">Company Name</Label>
-                    <Input id="company-name" placeholder="Enter company name" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company-code">Company Code</Label>
-                    <Input id="company-code" placeholder="e.g., ACME" />
-                  </div>
-                </div>
-                <Button size="sm">Save Company Info</Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* Sites */}
           <TabsContent value="sites" className="mt-4">
@@ -153,7 +137,7 @@ export default function FieldsSetupPage() {
                   </CardTitle>
                   <CardDescription className="text-xs">Manage site locations</CardDescription>
                 </div>
-                <Button size="sm">
+                <Button size="sm" onClick={() => setSiteDialogOpen(true)}>
                   <Plus className="h-3 w-3 mr-2" />
                   Add Site
                 </Button>
@@ -198,7 +182,7 @@ export default function FieldsSetupPage() {
                   </CardTitle>
                   <CardDescription className="text-xs">Manage locations within sites</CardDescription>
                 </div>
-                <Button size="sm">
+                <Button size="sm" onClick={() => setLocationDialogOpen(true)}>
                   <Plus className="h-3 w-3 mr-2" />
                   Add Location
                 </Button>
@@ -241,7 +225,7 @@ export default function FieldsSetupPage() {
                   </CardTitle>
                   <CardDescription className="text-xs">Manage asset categories</CardDescription>
                 </div>
-                <Button size="sm">
+                <Button size="sm" onClick={() => setCategoryDialogOpen(true)}>
                   <Plus className="h-3 w-3 mr-2" />
                   Add Category
                 </Button>
@@ -286,7 +270,7 @@ export default function FieldsSetupPage() {
                   </CardTitle>
                   <CardDescription className="text-xs">Manage departments</CardDescription>
                 </div>
-                <Button size="sm">
+                <Button size="sm" onClick={() => setDepartmentDialogOpen(true)}>
                   <Plus className="h-3 w-3 mr-2" />
                   Add Department
                 </Button>
@@ -304,6 +288,51 @@ export default function FieldsSetupPage() {
                     {departments.map((dept) => (
                       <TableRow key={dept.id}>
                         <TableCell className="font-medium">{dept.name}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">Active</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Makes */}
+          <TabsContent value="makes" className="mt-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Makes
+                  </CardTitle>
+                  <CardDescription className="text-xs">Manage asset manufacturers/brands</CardDescription>
+                </div>
+                <Button size="sm" onClick={() => setMakeDialogOpen(true)}>
+                  <Plus className="h-3 w-3 mr-2" />
+                  Add Make
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>NAME</TableHead>
+                      <TableHead>STATUS</TableHead>
+                      <TableHead className="text-right">ACTIONS</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {makes.map((make) => (
+                      <TableRow key={make.id}>
+                        <TableCell className="font-medium">{make.name}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">Active</Badge>
                         </TableCell>
@@ -375,6 +404,13 @@ export default function FieldsSetupPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* All Dialogs */}
+      <AddSiteDialog open={siteDialogOpen} onOpenChange={setSiteDialogOpen} />
+      <AddLocationDialog open={locationDialogOpen} onOpenChange={setLocationDialogOpen} />
+      <AddCategoryDialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen} />
+      <AddDepartmentDialog open={departmentDialogOpen} onOpenChange={setDepartmentDialogOpen} />
+      <AddMakeDialog open={makeDialogOpen} onOpenChange={setMakeDialogOpen} />
     </div>
   );
 }
