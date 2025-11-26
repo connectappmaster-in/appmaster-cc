@@ -369,31 +369,6 @@ export const CreateAssetDialog = ({
               </div>
             </div>
 
-            {/* Classification Section */}
-            <div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <FormField control={form.control} name="classification" render={({
-                field
-              }) => <FormItem>
-                      <FormLabel className="text-xs">Asset Classification</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <FormControl>
-                          <SelectTrigger className="h-8">
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Confidential">Confidential</SelectItem>
-                          <SelectItem value="Internal">Internal</SelectItem>
-                          <SelectItem value="Public">Public</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>} />
-              </div>
-            </div>
-
             {/* Organization Section */}
             <div>
               
@@ -476,27 +451,53 @@ export const CreateAssetDialog = ({
               </div>
             </div>
 
-            {/* Photo Section */}
-            <div>
-              <h3 className="text-xs font-semibold mb-1.5 text-muted-foreground uppercase">Asset Image</h3>
-              <FormField control={form.control} name="photo_url" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel className="text-xs">Image</FormLabel>
-                    <div className="flex gap-2">
-                      <FormControl>
-                        
-                      </FormControl>
-                      <Button type="button" variant="outline" size="sm" onClick={() => setImagePickerOpen(true)}>
-                        <ImagePlus className="h-4 w-4 mr-1" />
-                        Browse
-                      </Button>
-                    </div>
-                    {field.value && <div className="mt-2 relative w-32 h-32 rounded-md border overflow-hidden">
-                        <img src={field.value} alt="Preview" className="w-full h-full object-cover" />
-                      </div>}
-                    <FormMessage />
-                  </FormItem>} />
+            {/* Classification & Image Section - Bottom Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Classification Section - Bottom Left */}
+              <div>
+                <h3 className="text-xs font-semibold mb-1.5 text-muted-foreground uppercase">Classification</h3>
+                <FormField control={form.control} name="classification" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel className="text-xs">Asset Classification</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Confidential">Confidential</SelectItem>
+                          <SelectItem value="Internal">Internal</SelectItem>
+                          <SelectItem value="Public">Public</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>} />
+              </div>
+
+              {/* Photo Section - Bottom Right */}
+              <div>
+                <h3 className="text-xs font-semibold mb-1.5 text-muted-foreground uppercase">Asset Image</h3>
+                <FormField control={form.control} name="photo_url" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel className="text-xs">Image</FormLabel>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          
+                        </FormControl>
+                        <Button type="button" variant="outline" size="sm" onClick={() => setImagePickerOpen(true)}>
+                          <ImagePlus className="h-4 w-4 mr-1" />
+                          Browse
+                        </Button>
+                      </div>
+                      {field.value && <div className="mt-2 relative w-32 h-32 rounded-md border overflow-hidden">
+                          <img src={field.value} alt="Preview" className="w-full h-full object-cover" />
+                        </div>}
+                      <FormMessage />
+                    </FormItem>} />
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t">
