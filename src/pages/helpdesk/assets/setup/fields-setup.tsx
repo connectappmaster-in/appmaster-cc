@@ -18,7 +18,7 @@ import { AddLocationDialog } from "@/components/ITAM/AddLocationDialog";
 import { AddCategoryDialog } from "@/components/ITAM/AddCategoryDialog";
 import { AddDepartmentDialog } from "@/components/ITAM/AddDepartmentDialog";
 import { AddMakeDialog } from "@/components/ITAM/AddMakeDialog";
-
+import { EditCategoryDialog } from "@/components/ITAM/EditCategoryDialog";
 export default function FieldsSetupPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -34,7 +34,8 @@ export default function FieldsSetupPage() {
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [departmentDialogOpen, setDepartmentDialogOpen] = useState(false);
   const [makeDialogOpen, setMakeDialogOpen] = useState(false);
-
+  const [editCategoryDialogOpen, setEditCategoryDialogOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
   // Automatically calculate padding length from starting number
   const tagPaddingLength = tagStartNumber.length || 4;
 
@@ -247,7 +248,15 @@ export default function FieldsSetupPage() {
                           <Badge variant="secondary">Active</Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => {
+                              setSelectedCategory(category);
+                              setEditCategoryDialogOpen(true);
+                            }}
+                          >
                             <Pencil className="h-3 w-3" />
                           </Button>
                         </TableCell>
@@ -409,6 +418,14 @@ export default function FieldsSetupPage() {
       <AddSiteDialog open={siteDialogOpen} onOpenChange={setSiteDialogOpen} />
       <AddLocationDialog open={locationDialogOpen} onOpenChange={setLocationDialogOpen} />
       <AddCategoryDialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen} />
+      <EditCategoryDialog
+        open={editCategoryDialogOpen && !!selectedCategory}
+        onOpenChange={(open) => {
+          setEditCategoryDialogOpen(open);
+          if (!open) setSelectedCategory(null);
+        }}
+        category={selectedCategory}
+      />
       <AddDepartmentDialog open={departmentDialogOpen} onOpenChange={setDepartmentDialogOpen} />
       <AddMakeDialog open={makeDialogOpen} onOpenChange={setMakeDialogOpen} />
     </div>
