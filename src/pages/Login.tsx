@@ -247,11 +247,11 @@ const Login = () => {
                   <div className="space-y-2">
                     <Label>Account Type</Label>
                     <ToggleGroup type="single" value={accountType} onValueChange={value => {
-                      if (value) {
-                        setAccountType(value as 'personal' | 'organization');
-                        setSignupStep(2);
-                      }
-                    }} className="justify-start">
+                if (value) {
+                  setAccountType(value as 'personal' | 'organization');
+                  setSignupStep(2);
+                }
+              }} className="justify-start">
                       <ToggleGroupItem value="personal" className="flex-1">
                         Individual
                       </ToggleGroupItem>
@@ -263,10 +263,7 @@ const Login = () => {
                 </div>}
 
               {signupStep === 2 && <form onSubmit={handleSignupNext} className="space-y-4">
-                  <button type="button" onClick={handleBackInSignup} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-                    <ArrowLeft className="h-4 w-4" />
-                    Back
-                  </button>
+                  
 
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
