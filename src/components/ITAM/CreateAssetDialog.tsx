@@ -90,8 +90,8 @@ export const CreateAssetDialog = ({
       .maybeSingle();
 
     const prefix = tagFormat?.prefix || 'AS-';
-    // Use padding_length from database, or calculate from start_number, or default to 4
-    const paddingLength = tagFormat?.padding_length || tagFormat?.start_number?.length || 4;
+    // Prefer start_number length, then padding_length, then default
+    const paddingLength = (tagFormat?.start_number?.length ?? 0) || tagFormat?.padding_length || 4;
 
     // Get the highest existing asset ID
     const { data: assets } = await supabase
