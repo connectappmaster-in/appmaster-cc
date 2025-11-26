@@ -3971,6 +3971,47 @@ export type Database = {
           },
         ]
       }
+      itam_tag_format: {
+        Row: {
+          auto_increment: boolean
+          created_at: string | null
+          id: string
+          organisation_id: string | null
+          padding_length: number
+          prefix: string
+          start_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          auto_increment?: boolean
+          created_at?: string | null
+          id?: string
+          organisation_id?: string | null
+          padding_length?: number
+          prefix?: string
+          start_number?: string
+          updated_at?: string | null
+        }
+        Update: {
+          auto_increment?: boolean
+          created_at?: string | null
+          id?: string
+          organisation_id?: string | null
+          padding_length?: number
+          prefix?: string
+          start_number?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itam_tag_format_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       itam_tag_series: {
         Row: {
           category_name: string
@@ -7517,6 +7558,10 @@ export type Database = {
         }[]
       }
       get_monthly_burn_rate: { Args: { org_id: string }; Returns: number }
+      get_next_asset_number: {
+        Args: { p_organisation_id: string }
+        Returns: number
+      }
       get_next_asset_tags: {
         Args: { p_limit?: number; p_organisation_id: string }
         Returns: {

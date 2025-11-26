@@ -64,10 +64,10 @@ export const useAssetSetupConfig = () => {
       const { data, error } = await supabase
         .from("itam_tag_format")
         .select("*")
-        .single();
+        .maybeSingle();
       
-      if (error && error.code !== "PGRST116") throw error;
-      return data || { prefix: "AST-", start_number: "0001", auto_increment: true };
+      if (error) throw error;
+      return data || { prefix: "AST-", start_number: "0001", auto_increment: true, padding_length: 6 };
     },
   });
 
