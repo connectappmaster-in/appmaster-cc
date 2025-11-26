@@ -155,7 +155,7 @@ export default function HelpdeskAssets() {
   return <div className="min-h-screen bg-background">
       <AssetTopBar />
       
-      <div className="px-4 space-y-4 mt-2">
+      <div className="px-3 space-y-3 mt-2">
         {/* Quick Actions Row */}
         <div className="flex gap-2 flex-wrap">
           <Button size="sm" onClick={() => navigate("/helpdesk/assets/allassets")}>
@@ -163,7 +163,7 @@ export default function HelpdeskAssets() {
             Add Asset
           </Button>
           
-          <Button size="sm" variant="outline" onClick={() => navigate("/helpdesk/assets/allassets")}>
+          <Button size="sm" variant="outline" onClick={() => navigate("/helpdesk/assets/allassets?status=available")}>
             <CheckCircle className="w-4 h-4 mr-1" />
             Available
           </Button>
@@ -171,13 +171,13 @@ export default function HelpdeskAssets() {
         </div>
 
         {/* KPI Cards Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {/* Active Assets */}
-          <Card className="hover:shadow-sm transition-shadow">
-            <CardContent className="p-4">
+          <Card className="hover:shadow-sm transition-shadow cursor-pointer hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/allassets?status=active")}>
+            <CardContent className="p-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Active Assets</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Active Assets</p>
                   <p className="text-2xl font-bold">{metrics.activeAssets}</p>
                 </div>
                 <div className="w-8 h-8 rounded-md bg-blue-500/10 flex items-center justify-center">
@@ -188,11 +188,11 @@ export default function HelpdeskAssets() {
           </Card>
 
           {/* Available Assets */}
-          <Card className="hover:shadow-sm transition-shadow">
-            <CardContent className="p-4">
+          <Card className="hover:shadow-sm transition-shadow cursor-pointer hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/allassets?status=available")}>
+            <CardContent className="p-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Available</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Available</p>
                   <p className="text-2xl font-bold">{metrics.availableAssets}</p>
                 </div>
                 <div className="w-8 h-8 rounded-md bg-green-500/10 flex items-center justify-center">
@@ -203,11 +203,11 @@ export default function HelpdeskAssets() {
           </Card>
 
           {/* Recently Added */}
-          <Card className="hover:shadow-sm transition-shadow">
-            <CardContent className="p-4">
+          <Card className="hover:shadow-sm transition-shadow cursor-pointer hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/allassets?recent=30")}>
+            <CardContent className="p-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Recently Added</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Recently Added</p>
                   <p className="text-2xl font-bold">{metrics.recentlyAdded}</p>
                   <p className="text-xs text-muted-foreground">Last 30 days</p>
                 </div>
@@ -219,11 +219,11 @@ export default function HelpdeskAssets() {
           </Card>
 
           {/* In Maintenance */}
-          <Card className="hover:shadow-sm transition-shadow">
-            <CardContent className="p-4">
+          <Card className="hover:shadow-sm transition-shadow cursor-pointer hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/allassets?status=in_repair")}>
+            <CardContent className="p-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">In Maintenance</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">In Maintenance</p>
                   <p className="text-2xl font-bold">{metrics.maintenanceAssets}</p>
                 </div>
                 <div className="w-8 h-8 rounded-md bg-orange-500/10 flex items-center justify-center">
@@ -234,11 +234,11 @@ export default function HelpdeskAssets() {
           </Card>
 
           {/* Warranty Expiring */}
-          <Card className="hover:shadow-sm transition-shadow">
-            <CardContent className="p-4">
+          <Card className="hover:shadow-sm transition-shadow cursor-pointer hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/allassets?warranty=expiring")}>
+            <CardContent className="p-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Warranty Expiring</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Warranty Expiring</p>
                   <p className="text-2xl font-bold">{metrics.warrantyExpiring}</p>
                   <p className="text-xs text-muted-foreground">Next 60 days</p>
                 </div>
@@ -250,14 +250,26 @@ export default function HelpdeskAssets() {
           </Card>
 
           {/* Retired Assets */}
-          
-
-          {/* Total Asset Value */}
-          <Card className="hover:shadow-sm transition-shadow">
-            <CardContent className="p-4">
+          <Card className="hover:shadow-sm transition-shadow cursor-pointer hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/allassets?status=retired")}>
+            <CardContent className="p-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Total Value</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Retired Assets</p>
+                  <p className="text-2xl font-bold">{metrics.retiredAssets}</p>
+                </div>
+                <div className="w-8 h-8 rounded-md bg-gray-500/10 flex items-center justify-center">
+                  <TrendingDown className="w-4 h-4 text-gray-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Asset Value */}
+          <Card className="hover:shadow-sm transition-shadow cursor-pointer hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/depreciation/reports")}>
+            <CardContent className="p-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground mb-0.5">Total Value</p>
                   <p className="text-xl font-bold">₹{(metrics.totalValue / 100000).toFixed(1)}L</p>
                 </div>
                 <div className="w-8 h-8 rounded-md bg-purple-500/10 flex items-center justify-center">
@@ -268,50 +280,57 @@ export default function HelpdeskAssets() {
           </Card>
 
           {/* Net Book Value */}
-          
-        </div>
-
-        {/* Charts and Depreciation */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Status Distribution - Pie Chart */}
-          
-
-          {/* Category Breakdown - Bar Chart */}
-          
-
-          {/* Depreciation Summary */}
-          <Card>
-            <CardContent className="p-4">
-              <h3 className="text-sm font-semibold mb-3">Depreciation Summary</h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Value</p>
-                  <p className="text-lg font-bold">₹{(metrics.totalValue / 100000).toFixed(2)}L</p>
+          <Card className="hover:shadow-sm transition-shadow cursor-pointer hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/depreciation/reports")}>
+            <CardContent className="p-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground mb-0.5">Net Book Value</p>
+                  <p className="text-xl font-bold">₹{(metrics.netBookValue / 100000).toFixed(1)}L</p>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Depreciation</p>
-                  <p className="text-lg font-bold text-orange-500">₹{(metrics.totalDepreciation / 100000).toFixed(2)}L</p>
-                </div>
-                <div className="pt-2 border-t">
-                  <p className="text-xs text-muted-foreground">Net Book Value</p>
-                  <p className="text-xl font-bold text-green-500">₹{(metrics.netBookValue / 100000).toFixed(2)}L</p>
+                <div className="w-8 h-8 rounded-md bg-green-500/10 flex items-center justify-center">
+                  <DollarSign className="w-4 h-4 text-green-500" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Depreciation Summary */}
+        <Card className="cursor-pointer hover:shadow-sm transition-shadow hover:border-primary/20" onClick={() => navigate("/helpdesk/assets/depreciation/reports")}>
+          <CardContent className="p-3">
+            <h3 className="text-sm font-semibold mb-2">Depreciation Summary</h3>
+            <div className="space-y-2">
+              <div>
+                <p className="text-xs text-muted-foreground">Total Value</p>
+                <p className="text-lg font-bold">₹{(metrics.totalValue / 100000).toFixed(2)}L</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total Depreciation</p>
+                <p className="text-lg font-bold text-orange-500">₹{(metrics.totalDepreciation / 100000).toFixed(2)}L</p>
+              </div>
+              <div className="pt-2 border-t">
+                <p className="text-xs text-muted-foreground">Net Book Value</p>
+                <p className="text-xl font-bold text-green-500">₹{(metrics.netBookValue / 100000).toFixed(2)}L</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Recent Activity */}
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
+          <CardContent className="p-3">
+            <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-semibold">Recent Activity</h3>
               <Button size="sm" variant="ghost" onClick={() => navigate("/helpdesk/assets/audit")}>
                 View All
               </Button>
             </div>
-            <div className="space-y-2">
-              {recentEvents.slice(0, 5).map((event: any) => <div key={event.id} className="flex items-center justify-between py-2 border-b last:border-0">
+            <div className="space-y-1">
+              {recentEvents.slice(0, 5).map((event: any) => <div 
+                  key={event.id} 
+                  className="flex items-center justify-between py-1.5 border-b last:border-0 cursor-pointer hover:bg-accent/50 rounded px-2 -mx-2"
+                  onClick={() => navigate(`/helpdesk/assets/detail/${event.asset_id}`)}
+                >
                   <div className="flex-1">
                     <p className="text-sm font-medium">{event.itam_assets?.asset_tag || 'N/A'}</p>
                     <p className="text-xs text-muted-foreground">{event.event_type} • {event.itam_assets?.name}</p>
@@ -320,7 +339,7 @@ export default function HelpdeskAssets() {
                     {new Date(event.created_at).toLocaleDateString()}
                   </p>
                 </div>)}
-              {recentEvents.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>}
+              {recentEvents.length === 0 && <p className="text-sm text-muted-foreground text-center py-3">No recent activity</p>}
             </div>
           </CardContent>
         </Card>
