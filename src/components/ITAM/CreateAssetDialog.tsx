@@ -255,7 +255,7 @@ export const CreateAssetDialog = ({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             {/* Basic Info Section */}
             <div>
-              <h3 className="text-xs font-semibold mb-1.5 text-muted-foreground uppercase">Basic Info</h3>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <FormField control={form.control} name="asset_id" render={({
                 field
@@ -325,7 +325,7 @@ export const CreateAssetDialog = ({
 
             {/* Purchase Section */}
             <div>
-              <h3 className="text-xs font-semibold mb-1.5 text-muted-foreground uppercase">Purchase</h3>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <FormField control={form.control} name="purchase_date" render={({
                 field
@@ -396,7 +396,7 @@ export const CreateAssetDialog = ({
 
             {/* Organization Section */}
             <div>
-              <h3 className="text-xs font-semibold mb-1.5 text-muted-foreground uppercase">Organization</h3>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <FormField control={form.control} name="site" render={({
                 field
