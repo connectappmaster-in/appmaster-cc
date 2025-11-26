@@ -3762,6 +3762,54 @@ export type Database = {
           },
         ]
       }
+      itam_makes: {
+        Row: {
+          code: string | null
+          created_at: string
+          id: number
+          is_active: boolean
+          name: string
+          organisation_id: string | null
+          tenant_id: number
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          id?: number
+          is_active?: boolean
+          name: string
+          organisation_id?: string | null
+          tenant_id: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          id?: number
+          is_active?: boolean
+          name?: string
+          organisation_id?: string | null
+          tenant_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itam_makes_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itam_makes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       itam_purchase_orders: {
         Row: {
           attachments: string[] | null

@@ -58,6 +58,20 @@ export const useAssetSetupConfig = () => {
     },
   });
 
+  const { data: makes = [], isLoading: makesLoading } = useQuery({
+    queryKey: ["itam-makes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("itam_makes")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const { data: tagFormat } = useQuery({
     queryKey: ["itam-tag-format"],
     queryFn: async () => {
@@ -76,7 +90,8 @@ export const useAssetSetupConfig = () => {
     locations,
     categories,
     departments,
+    makes,
     tagFormat,
-    isLoading: sitesLoading || locationsLoading || categoriesLoading || departmentsLoading,
+    isLoading: sitesLoading || locationsLoading || categoriesLoading || departmentsLoading || makesLoading,
   };
 };
