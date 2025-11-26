@@ -14,30 +14,6 @@ export default function AssetSetup() {
       onClick: () => navigate("/helpdesk/assets/setup/fields-setup"),
     },
     {
-      title: "Tag Format",
-      description: "Configure asset tag generation",
-      icon: Hash,
-      onClick: () => navigate("/helpdesk/assets/setup/fields-setup"),
-    },
-    {
-      title: "Asset Types",
-      description: "Manage hardware and software types",
-      icon: Box,
-      onClick: () => navigate("/helpdesk/assets/setup/fields-setup"),
-    },
-    {
-      title: "Status Configuration",
-      description: "Available, Assigned, In Repair, Retired",
-      icon: Activity,
-      onClick: () => navigate("/helpdesk/assets/setup/fields-setup"),
-    },
-    {
-      title: "Condition Types",
-      description: "New, Good, Fair, Poor conditions",
-      icon: Wrench,
-      onClick: () => navigate("/helpdesk/assets/setup/fields-setup"),
-    },
-    {
       title: "Depreciation Methods",
       description: "Straight-line, declining balance",
       icon: TrendingDown,
