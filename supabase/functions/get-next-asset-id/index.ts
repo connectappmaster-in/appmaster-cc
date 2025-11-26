@@ -65,8 +65,8 @@ serve(async (req) => {
 
     // Use defaults if no tag format is configured
     const prefix = tagFormat?.prefix || 'AS-';
-    // Calculate padding from start_number length, or use stored padding_length, or default to 4
-    const paddingLength = tagFormat?.padding_length || tagFormat?.start_number?.length || 4;
+    // Prefer start_number length, then padding_length, then default
+    const paddingLength = (tagFormat?.start_number?.length ?? 0) || tagFormat?.padding_length || 4;
 
     // Call the database function to get the next number
     const { data: nextNumberData, error: nextNumberError } = await supabaseClient
