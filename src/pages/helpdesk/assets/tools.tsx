@@ -122,7 +122,7 @@ export default function ToolsPage() {
       
       <div className="px-4 py-4 space-y-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Asset Management Tools</h1>
+          
           <p className="text-sm text-muted-foreground mt-1">
             Comprehensive tools for managing your IT assets
           </p>
