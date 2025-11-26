@@ -33,27 +33,29 @@ serve(async (req) => {
       }
     );
 
-    const { data: users, error: lookupError } = await supabaseAdmin.auth.admin.listUsers();
+    const emailLower = String(email).toLowerCase();
 
-    if (lookupError) {
-      console.error("Error looking up users:", lookupError);
+    const { data, error } = await supabaseAdmin.auth.admin.getUserByEmail(emailLower);
+
+    if (error) {
+      console.error("Error getting user by email:", error);
+      // If Supabase explicitly says user not found, treat as non-existent
       return new Response(
-        JSON.stringify({ error: "System error occurred" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ exists: false }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const emailLower = String(email).toLowerCase();
-    const userExists = users.users.some((user) => user.email?.toLowerCase() === emailLower);
+    const exists = !!data?.user;
 
     return new Response(
-      JSON.stringify({ exists: userExists }),
+      JSON.stringify({ exists }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("System error in check-user-exists:", error);
     return new Response(
-      JSON.stringify({ error: "System error occurred. Please try again later." }),
+      JSON.stringify({ error: "System error occurred. Please try again later.", exists: false }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

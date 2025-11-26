@@ -32,3 +32,6 @@ verify_jwt = true
 
 [functions.reserve-next-asset-id]
 verify_jwt = true
+
+[functions.check-user-exists]
+verify_jwt = false
