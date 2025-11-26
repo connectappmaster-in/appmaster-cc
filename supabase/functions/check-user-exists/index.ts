@@ -16,11 +16,14 @@ serve(async (req) => {
     const { email } = await req.json();
 
     if (!email) {
+      console.error("No email provided in request");
       return new Response(
-        JSON.stringify({ error: "Email is required" }),
+        JSON.stringify({ error: "Email is required", exists: false }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    console.log("Checking email existence for:", email);
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -33,23 +36,25 @@ serve(async (req) => {
       }
     );
 
-    const emailLower = String(email).toLowerCase();
+    const emailLower = String(email).trim().toLowerCase();
 
-    const { data, error } = await supabaseAdmin.auth.admin.getUserByEmail(emailLower);
+    // Use listUsers and filter by email
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers();
 
     if (error) {
-      console.error("Error getting user by email:", error);
-      // If Supabase explicitly says user not found, treat as non-existent
+      console.error("Error listing users:", error);
       return new Response(
-        JSON.stringify({ exists: false }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "System error occurred", exists: false }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const exists = !!data?.user;
+    const userExists = data.users.some((user) => user.email?.toLowerCase() === emailLower);
+
+    console.log(`Email ${email} exists: ${userExists}`);
 
     return new Response(
-      JSON.stringify({ exists }),
+      JSON.stringify({ exists: userExists }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
