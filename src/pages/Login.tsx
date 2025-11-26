@@ -33,40 +33,27 @@ const Login = () => {
     }
   }, []);
 
-  // Check if email exists using auth API
+  // Check if email exists using edge function (admin API)
   const checkEmailExists = async (emailToCheck: string) => {
     try {
-      // Use signInWithPassword with a dummy password to check if user exists
-      // The error message will tell us if the email exists or not
-      const { error } = await supabase.auth.signInWithPassword({
-        email: emailToCheck,
-        password: '___dummy_check_password_xyz123___',
-      });
+      const response = await fetch(
+        "https://zxtpfrgsfuiwdppgiliv.functions.supabase.co/check-user-exists",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: emailToCheck }),
+        }
+      );
 
-      if (!error) {
-        // This shouldn't happen with a dummy password, but if it does, user exists
-        return true;
-      }
-
-      // Check error message to determine if user exists
-      const errorMsg = error.message.toLowerCase();
-      
-      // These error messages indicate the user EXISTS but password is wrong
-      if (errorMsg.includes('invalid login credentials') || 
-          errorMsg.includes('invalid password') ||
-          errorMsg.includes('email not confirmed')) {
-        return true;
-      }
-      
-      // These indicate user doesn't exist
-      if (errorMsg.includes('user not found') || 
-          errorMsg.includes('no user found') ||
-          errorMsg.includes('invalid email')) {
+      if (!response.ok) {
+        console.error("Failed to check email existence", await response.text());
         return false;
       }
-      
-      // For any other error, assume user doesn't exist to be safe
-      return false;
+
+      const data = await response.json();
+      return Boolean(data.exists);
     } catch (error) {
       console.error("Error in checkEmailExists:", error);
       return false;
