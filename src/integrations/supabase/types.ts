@@ -1155,6 +1155,7 @@ export type Database = {
           tenant_id: number
           title: string
           updated_at: string | null
+          updated_by: string | null
         }
         Insert: {
           attachments?: string[] | null
@@ -1174,6 +1175,7 @@ export type Database = {
           tenant_id?: number
           title: string
           updated_at?: string | null
+          updated_by?: string | null
         }
         Update: {
           attachments?: string[] | null
@@ -1193,6 +1195,7 @@ export type Database = {
           tenant_id?: number
           title?: string
           updated_at?: string | null
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -5817,6 +5820,7 @@ export type Database = {
           tenant_id: number
           title: string
           updated_at: string | null
+          updated_by: string | null
         }
         Insert: {
           additional_notes?: string | null
@@ -5839,6 +5843,7 @@ export type Database = {
           tenant_id?: number
           title: string
           updated_at?: string | null
+          updated_by?: string | null
         }
         Update: {
           additional_notes?: string | null
@@ -5861,6 +5866,7 @@ export type Database = {
           tenant_id?: number
           title?: string
           updated_at?: string | null
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -7225,6 +7231,41 @@ export type Database = {
         }
         Relationships: []
       }
+      user_org_map: {
+        Row: {
+          created_at: string | null
+          id: string
+          organisation_id: string
+          role: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          organisation_id: string
+          role: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          organisation_id?: string
+          role?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_org_map_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_permissions: {
         Row: {
           created_at: string | null
@@ -7554,6 +7595,7 @@ export type Database = {
       }
     }
     Functions: {
+      auth_organisation_id: { Args: never; Returns: string }
       bulk_soft_delete_problems: {
         Args: { problem_ids: number[] }
         Returns: undefined
@@ -7695,6 +7737,7 @@ export type Database = {
       get_user_org: { Args: never; Returns: string }
       get_user_org_fallback: { Args: never; Returns: string }
       get_user_org_if_admin: { Args: never; Returns: string }
+      get_user_org_role: { Args: { _org_id: string }; Returns: string }
       get_user_tenant: { Args: { _user_id: string }; Returns: number }
       has_any_role: {
         Args: {
@@ -7711,6 +7754,7 @@ export type Database = {
         Args: { feature_key: string; org_id: string }
         Returns: boolean
       }
+      has_org_access: { Args: { _org_id: string }; Returns: boolean }
       has_permission: {
         Args: { permission_key: string; user_id_param: string }
         Returns: boolean
@@ -7727,7 +7771,9 @@ export type Database = {
         Returns: boolean
       }
       is_appmaster_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_org_admin_user: { Args: never; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_super_admin_user: { Args: never; Returns: boolean }
       soft_delete_problem: {
         Args: { problem_id_param: number }
         Returns: undefined
