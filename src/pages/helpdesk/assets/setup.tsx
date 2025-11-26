@@ -2,42 +2,30 @@ import { AssetTopBar } from "@/components/ITAM/AssetTopBar";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, Hash, Box, Activity, Wrench, TrendingDown, Building2, MapPin } from "lucide-react";
-
 export default function AssetSetup() {
   const navigate = useNavigate();
-
-  const setupCards = [
-    {
-      title: "Fields Setup",
-      description: "Company, Sites, Categories, Departments",
-      icon: Settings,
-      onClick: () => navigate("/helpdesk/assets/setup/fields-setup"),
-    },
-    {
-      title: "Depreciation Methods",
-      description: "Straight-line, declining balance",
-      icon: TrendingDown,
-      onClick: () => navigate("/helpdesk/assets/depreciation"),
-    },
-  ];
-
-  return (
-    <div className="min-h-screen bg-background">
+  const setupCards = [{
+    title: "Fields Setup",
+    description: "Company, Sites, Categories, Departments",
+    icon: Settings,
+    onClick: () => navigate("/helpdesk/assets/setup/fields-setup")
+  }, {
+    title: "Depreciation Methods",
+    description: "Straight-line, declining balance",
+    icon: TrendingDown,
+    onClick: () => navigate("/helpdesk/assets/depreciation")
+  }];
+  return <div className="min-h-screen bg-background">
       <AssetTopBar />
       
       <div className="p-6 space-y-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Asset Setup</h2>
-          <p className="text-muted-foreground">Configure asset management system settings</p>
+          
+          
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {setupCards.map((card, index) => (
-            <Card 
-              key={index} 
-              className="cursor-pointer hover:border-primary transition-colors"
-              onClick={card.onClick}
-            >
+          {setupCards.map((card, index) => <Card key={index} className="cursor-pointer hover:border-primary transition-colors" onClick={card.onClick}>
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-primary/10">
@@ -51,10 +39,8 @@ export default function AssetSetup() {
               <CardContent>
                 <CardDescription className="text-sm">{card.description}</CardDescription>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
