@@ -142,7 +142,10 @@ export const CreateAssetDialog = ({
         return '';
       }
 
-      // No need to show warning for auto-incremented IDs - it's expected behavior
+      if (data?.warning) {
+        toast.warning(data.warning);
+      }
+
       return data?.assetId || '';
     } catch (err) {
       console.error('Exception calling edge function:', err);
