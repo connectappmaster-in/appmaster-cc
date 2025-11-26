@@ -8,12 +8,11 @@ import { Separator } from "@/components/ui/separator";
 import { Building2, Bell, Mail, Clock, Shield, Palette, Users } from "lucide-react";
 import { OrgUsersManager } from "@/components/OrgAdmin/OrgUsersManager";
 import { useRole } from "@/hooks/useRole";
-
 export default function SettingsModule() {
-  const { isAdmin } = useRole();
-
-  return (
-    <div className="w-full h-full space-y-4">
+  const {
+    isAdmin
+  } = useRole();
+  return <div className="w-full h-full space-y-4">
       <Tabs defaultValue={isAdmin() ? "users" : "general"} className="w-full">
         <TabsList className={`grid w-full ${isAdmin() ? 'grid-cols-7' : 'grid-cols-6'}`}>
           {isAdmin() && <TabsTrigger value="users">Users</TabsTrigger>}
@@ -25,21 +24,14 @@ export default function SettingsModule() {
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
 
-        {isAdmin() && (
-          <TabsContent value="users" className="space-y-3 mt-4">
+        {isAdmin() && <TabsContent value="users" className="space-y-3 mt-4">
             <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  <CardTitle>User Management</CardTitle>
-                </div>
-              </CardHeader>
+              
               <CardContent className="p-4">
                 <OrgUsersManager />
               </CardContent>
             </Card>
-          </TabsContent>
-        )}
+          </TabsContent>}
 
         <TabsContent value="general" className="space-y-3 mt-4">
           <Card>
@@ -165,6 +157,5 @@ export default function SettingsModule() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 }
