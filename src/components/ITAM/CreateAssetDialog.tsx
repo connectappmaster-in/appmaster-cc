@@ -69,12 +69,12 @@ export const CreateAssetDialog = ({
     }
   });
 
-  // Fetch next asset ID when dialog opens
+  // Clear form when dialog opens
   useEffect(() => {
     if (open) {
-      fetchNextAssetId();
+      form.reset();
     }
-  }, [open]);
+  }, [open, form]);
   const generateFallbackAssetId = async (): Promise<string> => {
     // Fallback: Get the last asset ID from the database and increment
     const {
@@ -118,31 +118,57 @@ export const CreateAssetDialog = ({
     const paddedNumber = nextNumber.toString().padStart(paddingLength, '0');
     return `${prefix}${paddedNumber}`;
   };
-  const fetchNextAssetId = async () => {
+  const generateAssetIdByCategory = async (categoryName: string) => {
+    // Find category ID from name
+    const selectedCategory = categories.find(cat => cat.name === categoryName);
+    if (!selectedCategory) {
+      toast.error("Please select a valid category");
+      return '';
+    }
+
     setIsGeneratingId(true);
     try {
-      // Try to use the edge function first
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('get-next-asset-id');
-      if (error || !data?.assetId) {
-        console.log('Edge function not available, using fallback method');
-        // Fallback to client-side generation
-        const fallbackId = await generateFallbackAssetId();
-        form.setValue('asset_id', fallbackId);
-      } else {
-        form.setValue('asset_id', data.assetId);
+      const { data, error } = await supabase.functions.invoke('get-next-asset-id-by-category', {
+        body: { category_id: selectedCategory.id }
+      });
+
+      if (error) {
+        console.error('Error calling edge function:', error);
+        if (data?.needsConfiguration) {
+          toast.error(data.error);
+          return '';
+        }
+        toast.error("Failed to generate asset ID. Please configure tag format for this category.");
+        return '';
       }
-    } catch (error) {
-      console.log('Error calling edge function, using fallback:', error);
-      // Use fallback on any error
-      const fallbackId = await generateFallbackAssetId();
-      form.setValue('asset_id', fallbackId);
+
+      if (data?.warning) {
+        toast.warning(data.warning);
+      }
+
+      return data?.assetId || '';
+    } catch (err) {
+      console.error('Exception calling edge function:', err);
+      toast.error("Error generating asset ID");
+      return '';
     } finally {
       setIsGeneratingId(false);
     }
   };
+
+  // Watch for category changes and auto-generate asset ID
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'category' && value.category) {
+        generateAssetIdByCategory(value.category).then(assetId => {
+          if (assetId) {
+            form.setValue('asset_id', assetId);
+          }
+        });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, categories]);
   const validateAssetIdUniqueness = async (assetId: string): Promise<boolean> => {
     try {
       const {
@@ -173,6 +199,17 @@ export const CreateAssetDialog = ({
       const {
         data: profileData
       } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).maybeSingle();
+
+      // Validate asset_id uniqueness
+      const { data: existingAsset } = await supabase
+        .from("itam_assets")
+        .select("id")
+        .eq("asset_id", values.asset_id)
+        .maybeSingle();
+
+      if (existingAsset) {
+        throw new Error("Asset ID already exists. Please use a different ID.");
+      }
 
       // Generate asset tag from asset_id or auto-generate
       const assetTag = values.asset_id || `AST-${Date.now().toString().slice(-6)}`;
@@ -205,6 +242,20 @@ export const CreateAssetDialog = ({
         error
       } = await supabase.from("itam_assets").insert([assetData]).select().single();
       if (error) throw error;
+
+      // Reserve the next asset ID for this category
+      const selectedCategory = categories.find(cat => cat.name === values.category);
+      if (selectedCategory) {
+        try {
+          await supabase.functions.invoke('reserve-next-asset-id', {
+            body: { category_id: selectedCategory.id }
+          });
+        } catch (err) {
+          console.error('Error reserving next ID:', err);
+          // Don't fail the asset creation if reservation fails
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -280,15 +331,11 @@ export const CreateAssetDialog = ({
                 field
               }) => <FormItem>
                       <FormLabel className="text-xs">Asset ID *</FormLabel>
-                      <div className="flex gap-2">
-                        <FormControl>
-                          <Input className="h-8" {...field} placeholder="Auto-generated ID" />
-                        </FormControl>
-                        <Button type="button" variant="outline" size="sm" onClick={fetchNextAssetId} disabled={isGeneratingId}>
-                          {isGeneratingId ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                        </Button>
-                      </div>
+                      <FormControl>
+                        <Input className="h-8" {...field} placeholder="Select category first" disabled={isGeneratingId} />
+                      </FormControl>
                       <FormMessage />
+                      {isGeneratingId && <p className="text-xs text-muted-foreground">Generating ID...</p>}
                     </FormItem>} />
 
                 <FormField control={form.control} name="brand" render={({
