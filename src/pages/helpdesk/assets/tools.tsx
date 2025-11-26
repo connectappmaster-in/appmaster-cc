@@ -15,12 +15,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+
 export default function ToolsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [photoGalleryOpen, setPhotoGalleryOpen] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [deletePhotoConfirm, setDeletePhotoConfirm] = useState<any>(null);
   const [importing, setImporting] = useState(false);
   const [exportFormat, setExportFormat] = useState<'csv' | 'excel'>('csv');
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   // Fetch asset photos from storage bucket
   const {
@@ -292,11 +296,7 @@ export default function ToolsPage() {
                         variant="destructive"
                         size="icon"
                         className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => {
-                          if (confirm('Are you sure you want to delete this photo?')) {
-                            deletePhotoMutation.mutate(photo);
-                          }
-                        }}
+                        onClick={() => setDeletePhotoConfirm(photo)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -363,5 +363,20 @@ export default function ToolsPage() {
           </Card>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deletePhotoConfirm !== null}
+        onOpenChange={(open) => !open && setDeletePhotoConfirm(null)}
+        onConfirm={() => {
+          if (deletePhotoConfirm) {
+            deletePhotoMutation.mutate(deletePhotoConfirm);
+          }
+          setDeletePhotoConfirm(null);
+        }}
+        title="Delete Photo"
+        description="Are you sure you want to delete this photo? This action cannot be undone."
+        confirmText="Delete"
+        variant="destructive"
+      />
     </div>;
 }
