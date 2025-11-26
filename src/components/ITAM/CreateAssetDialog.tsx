@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, ImagePlus } from "lucide-react";
+import { Loader2, ImagePlus, RefreshCw } from "lucide-react";
 import { ImagePickerDialog } from "./ImagePickerDialog";
 import { useAssetSetupConfig } from "@/hooks/useAssetSetupConfig";
 const assetSchema = z.object({
@@ -40,6 +40,7 @@ export const CreateAssetDialog = ({
 }: CreateAssetDialogProps) => {
   const queryClient = useQueryClient();
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
+  const [isGeneratingId, setIsGeneratingId] = useState(false);
   const { sites, locations, categories, departments } = useAssetSetupConfig();
   const form = useForm<z.infer<typeof assetSchema>>({
     resolver: zodResolver(assetSchema),
@@ -61,6 +62,55 @@ export const CreateAssetDialog = ({
       photo_url: ""
     }
   });
+
+  // Fetch next asset ID when dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchNextAssetId();
+    }
+  }, [open]);
+
+  const fetchNextAssetId = async () => {
+    setIsGeneratingId(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('get-next-asset-id');
+      
+      if (error) {
+        console.error('Error fetching next asset ID:', error);
+        toast.error('Failed to generate asset ID');
+        return;
+      }
+
+      if (data?.assetId) {
+        form.setValue('asset_id', data.assetId);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to generate asset ID');
+    } finally {
+      setIsGeneratingId(false);
+    }
+  };
+
+  const validateAssetIdUniqueness = async (assetId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('itam_assets')
+        .select('asset_id')
+        .eq('asset_id', assetId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error validating asset ID:', error);
+        return true; // Allow submission if validation fails
+      }
+
+      return !data; // Return true if asset_id doesn't exist (unique)
+    } catch (error) {
+      console.error('Error:', error);
+      return true;
+    }
+  };
   const createAsset = useMutation({
     mutationFn: async (values: z.infer<typeof assetSchema>) => {
       const {
@@ -134,7 +184,19 @@ export const CreateAssetDialog = ({
       toast.error("Failed to create asset: " + error.message);
     }
   });
-  const onSubmit = (values: z.infer<typeof assetSchema>) => {
+  const onSubmit = async (values: z.infer<typeof assetSchema>) => {
+    // Validate asset ID uniqueness before submitting
+    const isUnique = await validateAssetIdUniqueness(values.asset_id);
+    
+    if (!isUnique) {
+      form.setError('asset_id', {
+        type: 'manual',
+        message: 'Asset ID already exists. Please use a unique ID.'
+      });
+      toast.error('Asset ID already exists. Please use a unique ID.');
+      return;
+    }
+
     createAsset.mutate(values);
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
@@ -153,9 +215,28 @@ export const CreateAssetDialog = ({
                 field
               }) => <FormItem>
                       <FormLabel className="text-xs">Asset ID *</FormLabel>
-                      <FormControl>
-                        <Input className="h-8" {...field} />
-                      </FormControl>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input 
+                            className="h-8" 
+                            {...field}
+                            placeholder="Auto-generated ID" 
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={fetchNextAssetId}
+                          disabled={isGeneratingId}
+                        >
+                          {isGeneratingId ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                       <FormMessage />
                     </FormItem>} />
 
