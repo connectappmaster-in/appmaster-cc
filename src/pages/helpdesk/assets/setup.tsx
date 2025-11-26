@@ -4,78 +4,61 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Settings, TrendingDown, Building2, FileKey, ShoppingCart, Wrench, FileText } from "lucide-react";
 export default function AssetSetup() {
   const navigate = useNavigate();
-  const setupCards = [
-    {
-      title: "Fields Setup",
-      description: "Sites, Locations, Categories, Departments, Makes",
-      icon: Settings,
-      onClick: () => navigate("/helpdesk/assets/setup/fields-setup"),
-      category: "Core Configuration"
-    },
-    {
-      title: "Depreciation Methods",
-      description: "Straight-line, declining balance",
-      icon: TrendingDown,
-      onClick: () => navigate("/helpdesk/assets/depreciation"),
-      category: "Core Configuration"
-    },
-    {
-      title: "Vendors Management",
-      description: "Manage suppliers and service providers",
-      icon: Building2,
-      onClick: () => navigate("/helpdesk/assets/vendors"),
-      category: "Vendor & Procurement"
-    },
-    {
-      title: "Purchase Orders",
-      description: "Configure purchase order workflow",
-      icon: ShoppingCart,
-      onClick: () => navigate("/helpdesk/assets/purchase-orders"),
-      category: "Vendor & Procurement"
-    },
-    {
-      title: "License Management",
-      description: "Software licenses and allocations",
-      icon: FileKey,
-      onClick: () => navigate("/helpdesk/assets/licenses"),
-      category: "Software Management"
-    },
-    {
-      title: "Repairs & Maintenance",
-      description: "Asset repair and maintenance tracking",
-      icon: Wrench,
-      onClick: () => navigate("/helpdesk/assets/repairs"),
-      category: "Operations"
-    },
-    {
-      title: "Audit Trail",
-      description: "Asset history and compliance tracking",
-      icon: FileText,
-      onClick: () => navigate("/helpdesk/assets/audit"),
-      category: "Operations"
-    }
-  ];
-
+  const setupCards = [{
+    title: "Fields Setup",
+    description: "Sites, Locations, Categories, Departments, Makes",
+    icon: Settings,
+    onClick: () => navigate("/helpdesk/assets/setup/fields-setup"),
+    category: "Core Configuration"
+  }, {
+    title: "Depreciation Methods",
+    description: "Straight-line, declining balance",
+    icon: TrendingDown,
+    onClick: () => navigate("/helpdesk/assets/depreciation"),
+    category: "Core Configuration"
+  }, {
+    title: "Vendors Management",
+    description: "Manage suppliers and service providers",
+    icon: Building2,
+    onClick: () => navigate("/helpdesk/assets/vendors"),
+    category: "Vendor & Procurement"
+  }, {
+    title: "Purchase Orders",
+    description: "Configure purchase order workflow",
+    icon: ShoppingCart,
+    onClick: () => navigate("/helpdesk/assets/purchase-orders"),
+    category: "Vendor & Procurement"
+  }, {
+    title: "License Management",
+    description: "Software licenses and allocations",
+    icon: FileKey,
+    onClick: () => navigate("/helpdesk/assets/licenses"),
+    category: "Software Management"
+  }, {
+    title: "Repairs & Maintenance",
+    description: "Asset repair and maintenance tracking",
+    icon: Wrench,
+    onClick: () => navigate("/helpdesk/assets/repairs"),
+    category: "Operations"
+  }, {
+    title: "Audit Trail",
+    description: "Asset history and compliance tracking",
+    icon: FileText,
+    onClick: () => navigate("/helpdesk/assets/audit"),
+    category: "Operations"
+  }];
   const categories = Array.from(new Set(setupCards.map(card => card.category)));
   return <div className="min-h-screen bg-background">
       <AssetTopBar />
       
       <div className="p-6 space-y-8">
-        {categories.map((category) => (
-          <div key={category} className="space-y-4">
+        {categories.map(category => <div key={category} className="space-y-4">
             <div>
               <h2 className="text-lg font-semibold text-foreground">{category}</h2>
-              <p className="text-sm text-muted-foreground">Configure {category.toLowerCase()} settings</p>
+              
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {setupCards
-                .filter((card) => card.category === category)
-                .map((card, index) => (
-                  <Card 
-                    key={index} 
-                    className="cursor-pointer hover:border-primary hover:shadow-md transition-all" 
-                    onClick={card.onClick}
-                  >
+              {setupCards.filter(card => card.category === category).map((card, index) => <Card key={index} className="cursor-pointer hover:border-primary hover:shadow-md transition-all" onClick={card.onClick}>
                     <CardHeader className="pb-3">
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-lg bg-primary/10">
@@ -89,11 +72,9 @@ export default function AssetSetup() {
                     <CardContent>
                       <CardDescription className="text-sm">{card.description}</CardDescription>
                     </CardContent>
-                  </Card>
-                ))}
+                  </Card>)}
             </div>
-          </div>
-        ))}
+          </div>)}
       </div>
     </div>;
 }
