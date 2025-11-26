@@ -290,11 +290,6 @@ const Login = () => {
                 </form>}
 
               {signupStep === 3 && <form onSubmit={handleSignupNext} className="space-y-4">
-                  <button type="button" onClick={handleBackInSignup} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-                    <ArrowLeft className="h-4 w-4" />
-                    Back
-                  </button>
-
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input id="signup-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="name@company.com" autoFocus />
@@ -306,11 +301,6 @@ const Login = () => {
                 </form>}
 
               {signupStep === 4 && <form onSubmit={handleSignupSubmit} className="space-y-4">
-                  <button type="button" onClick={handleBackInSignup} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-                    <ArrowLeft className="h-4 w-4" />
-                    Back
-                  </button>
-
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <Input id="signup-password" type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Minimum 6 characters" minLength={6} autoFocus />
