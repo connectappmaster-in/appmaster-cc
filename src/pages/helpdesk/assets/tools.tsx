@@ -4,25 +4,28 @@ import { AssetTopBar } from "@/components/ITAM/AssetTopBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Upload, Download, FileImage, Wrench, TrendingUp } from "lucide-react";
+import { Upload, Download, FileImage, Wrench, TrendingUp, Trash2, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 export default function ToolsPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [importing, setImporting] = useState(false);
   const [exportFormat, setExportFormat] = useState<'csv' | 'excel'>('csv');
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   // Fetch asset photos for gallery
   const {
-    data: assetPhotos
+    data: assetPhotos,
+    refetch: refetchPhotos
   } = useQuery({
     queryKey: ['asset-photos'],
     queryFn: async () => {
@@ -36,6 +39,93 @@ export default function ToolsPage() {
       return data;
     }
   });
+
+  // Upload photo mutation
+  const uploadPhotoMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('asset-photos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('asset-photos')
+        .getPublicUrl(filePath);
+
+      const { error: dbError } = await supabase
+        .from('asset_photos')
+        .insert({
+          photo_url: publicUrl,
+          asset_id: 0, // Placeholder, should be updated when assigning to an asset
+          tenant_id: 1 // Should be dynamic based on user's tenant
+        });
+
+      if (dbError) throw dbError;
+    },
+    onSuccess: () => {
+      toast.success('Photo uploaded successfully');
+      queryClient.invalidateQueries({ queryKey: ['asset-photos'] });
+      refetchPhotos();
+    },
+    onError: (error) => {
+      toast.error('Failed to upload photo');
+      console.error(error);
+    }
+  });
+
+  // Delete photo mutation
+  const deletePhotoMutation = useMutation({
+    mutationFn: async (photo: any) => {
+      // Extract file path from URL
+      const url = new URL(photo.photo_url);
+      const filePath = url.pathname.split('/').pop();
+
+      const { error: storageError } = await supabase.storage
+        .from('asset-photos')
+        .remove([filePath || '']);
+
+      if (storageError) throw storageError;
+
+      const { error: dbError } = await supabase
+        .from('asset_photos')
+        .delete()
+        .eq('id', photo.id);
+
+      if (dbError) throw dbError;
+    },
+    onSuccess: () => {
+      toast.success('Photo deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['asset-photos'] });
+      refetchPhotos();
+    },
+    onError: (error) => {
+      toast.error('Failed to delete photo');
+      console.error(error);
+    }
+  });
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      await uploadPhotoMutation.mutateAsync(file);
+    } finally {
+      setUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -174,26 +264,59 @@ export default function ToolsPage() {
               <DialogHeader>
                 <DialogTitle>Asset Photo Gallery</DialogTitle>
                 <DialogDescription>
-                  Browse all asset photos in your inventory
+                  Browse, upload, and manage asset photos
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                {assetPhotos?.map((photo: any) => <div key={photo.id} className="space-y-2">
-                    <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                      <img src={photo.photo_url} alt="Asset" className="w-full h-full object-cover hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="text-xs">
-                      <p className="font-medium truncate">
-                        {photo.itam_assets?.brand} {photo.itam_assets?.model}
-                      </p>
-                      <p className="text-muted-foreground">
-                        {photo.itam_assets?.asset_id}
-                      </p>
-                    </div>
-                  </div>)}
-                {(!assetPhotos || assetPhotos.length === 0) && <div className="col-span-full text-center py-12 text-muted-foreground">
-                    No photos available
-                  </div>}
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="photo-upload" className="cursor-pointer">
+                    <Button variant="outline" size="sm" disabled={uploadingPhoto} asChild>
+                      <span>
+                        <Plus className="h-4 w-4 mr-2" />
+                        {uploadingPhoto ? 'Uploading...' : 'Add Photo'}
+                      </span>
+                    </Button>
+                  </Label>
+                  <Input
+                    id="photo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                  {assetPhotos?.map((photo: any) => <div key={photo.id} className="relative group">
+                      <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+                        <img src={photo.photo_url} alt="Asset" className="w-full h-full object-cover hover:scale-110 transition-transform" />
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => {
+                          if (confirm('Are you sure you want to delete this photo?')) {
+                            deletePhotoMutation.mutate(photo);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                      <div className="text-xs mt-2">
+                        <p className="font-medium truncate">
+                          {photo.itam_assets?.brand} {photo.itam_assets?.model}
+                        </p>
+                        <p className="text-muted-foreground">
+                          {photo.itam_assets?.asset_id || 'Unassigned'}
+                        </p>
+                      </div>
+                    </div>)}
+                  {(!assetPhotos || assetPhotos.length === 0) && <div className="col-span-full text-center py-12 text-muted-foreground">
+                      No photos available. Upload your first photo!
+                    </div>}
+                </div>
               </div>
             </DialogContent>
           </Dialog>
