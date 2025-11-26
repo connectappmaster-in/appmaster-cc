@@ -9,37 +9,54 @@ import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Lazy load charts for performance
-const PieChart = lazy(() => import("recharts").then(mod => ({ default: mod.PieChart })));
-const Pie = lazy(() => import("recharts").then(mod => ({ default: mod.Pie })));
-const BarChart = lazy(() => import("recharts").then(mod => ({ default: mod.BarChart })));
-const Bar = lazy(() => import("recharts").then(mod => ({ default: mod.Bar })));
-const Cell = lazy(() => import("recharts").then(mod => ({ default: mod.Cell })));
-const ResponsiveContainer = lazy(() => import("recharts").then(mod => ({ default: mod.ResponsiveContainer })));
-const Tooltip = lazy(() => import("recharts").then(mod => ({ default: mod.Tooltip })));
-
+const PieChart = lazy(() => import("recharts").then(mod => ({
+  default: mod.PieChart
+})));
+const Pie = lazy(() => import("recharts").then(mod => ({
+  default: mod.Pie
+})));
+const BarChart = lazy(() => import("recharts").then(mod => ({
+  default: mod.BarChart
+})));
+const Bar = lazy(() => import("recharts").then(mod => ({
+  default: mod.Bar
+})));
+const Cell = lazy(() => import("recharts").then(mod => ({
+  default: mod.Cell
+})));
+const ResponsiveContainer = lazy(() => import("recharts").then(mod => ({
+  default: mod.ResponsiveContainer
+})));
+const Tooltip = lazy(() => import("recharts").then(mod => ({
+  default: mod.Tooltip
+})));
 export default function HelpdeskAssets() {
   const navigate = useNavigate();
 
   // Optimized parallel data fetching
-  const { data: assetData, isLoading } = useQuery({
+  const {
+    data: assetData,
+    isLoading
+  } = useQuery({
     queryKey: ["assets-overview"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       // Parallel fetch user context
-      const [userData, profileData] = await Promise.all([
-        supabase.from("users").select("organisation_id").eq("auth_user_id", user.id).single(),
-        supabase.from("profiles").select("tenant_id").eq("id", user.id).maybeSingle()
-      ]);
-
+      const [userData, profileData] = await Promise.all([supabase.from("users").select("organisation_id").eq("auth_user_id", user.id).single(), supabase.from("profiles").select("tenant_id").eq("id", user.id).maybeSingle()]);
       const tenantId = profileData.data?.tenant_id || 1;
       const orgId = userData.data?.organisation_id;
 
       // Build base queries
       let assetsQuery = supabase.from("itam_assets").select("*").eq("is_deleted", false);
-      let eventsQuery = supabase.from("asset_events").select("*, itam_assets(asset_tag, name)").order("created_at", { ascending: false }).limit(5);
-
+      let eventsQuery = supabase.from("asset_events").select("*, itam_assets(asset_tag, name)").order("created_at", {
+        ascending: false
+      }).limit(5);
       if (orgId) {
         assetsQuery = assetsQuery.eq("organisation_id", orgId);
         eventsQuery = eventsQuery.eq("tenant_id", tenantId);
@@ -49,19 +66,14 @@ export default function HelpdeskAssets() {
       }
 
       // Parallel fetch all data
-      const [assetsResult, eventsResult] = await Promise.all([
-        assetsQuery,
-        eventsQuery
-      ]);
-
+      const [assetsResult, eventsResult] = await Promise.all([assetsQuery, eventsQuery]);
       return {
         assets: assetsResult.data || [],
         recentEvents: eventsResult.data || []
       };
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
-
   const allAssets = assetData?.assets || [];
   const recentEvents = assetData?.recentEvents || [];
 
@@ -71,7 +83,7 @@ export default function HelpdeskAssets() {
     const availableAssets = allAssets.filter(a => a.status === 'available');
     const maintenanceAssets = allAssets.filter(a => a.status === 'in_repair');
     const retiredAssets = allAssets.filter(a => a.status === 'retired');
-    
+
     // Recently added (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -80,14 +92,10 @@ export default function HelpdeskAssets() {
     // Warranty expiring soon (next 60 days)
     const sixtyDaysLater = new Date();
     sixtyDaysLater.setDate(sixtyDaysLater.getDate() + 60);
-    const warrantyExpiring = allAssets.filter(a => 
-      a.warranty_end && new Date(a.warranty_end) <= sixtyDaysLater && new Date(a.warranty_end) > new Date()
-    );
-
+    const warrantyExpiring = allAssets.filter(a => a.warranty_end && new Date(a.warranty_end) <= sixtyDaysLater && new Date(a.warranty_end) > new Date());
     const totalValue = allAssets.reduce((sum, a) => sum + (a.cost || 0), 0);
     const totalDepreciation = allAssets.reduce((sum, a) => sum + (a.accumulated_depreciation || 0), 0);
     const netBookValue = totalValue - totalDepreciation;
-
     return {
       activeAssets: activeAssets.length,
       availableAssets: availableAssets.length,
@@ -102,29 +110,37 @@ export default function HelpdeskAssets() {
   }, [allAssets]);
 
   // Chart data
-  const statusData = useMemo(() => [
-    { name: 'Available', value: allAssets.filter(a => a.status === 'available').length, color: 'hsl(var(--chart-2))' },
-    { name: 'Checked Out', value: allAssets.filter(a => a.status === 'checked_out').length, color: 'hsl(var(--chart-1))' },
-    { name: 'Maintenance', value: allAssets.filter(a => a.status === 'in_repair').length, color: 'hsl(var(--chart-3))' },
-    { name: 'Retired', value: allAssets.filter(a => a.status === 'retired').length, color: 'hsl(var(--chart-4))' }
-  ].filter(d => d.value > 0), [allAssets]);
-
+  const statusData = useMemo(() => [{
+    name: 'Available',
+    value: allAssets.filter(a => a.status === 'available').length,
+    color: 'hsl(var(--chart-2))'
+  }, {
+    name: 'Checked Out',
+    value: allAssets.filter(a => a.status === 'checked_out').length,
+    color: 'hsl(var(--chart-1))'
+  }, {
+    name: 'Maintenance',
+    value: allAssets.filter(a => a.status === 'in_repair').length,
+    color: 'hsl(var(--chart-3))'
+  }, {
+    name: 'Retired',
+    value: allAssets.filter(a => a.status === 'retired').length,
+    color: 'hsl(var(--chart-4))'
+  }].filter(d => d.value > 0), [allAssets]);
   const categoryData = useMemo(() => {
     const categoryMap = new Map<string, number>();
     allAssets.forEach(asset => {
       const category = asset.category || 'Other';
       categoryMap.set(category, (categoryMap.get(category) || 0) + 1);
     });
-    return Array.from(categoryMap.entries())
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 6);
+    return Array.from(categoryMap.entries()).map(([name, value]) => ({
+      name,
+      value
+    })).sort((a, b) => b.value - a.value).slice(0, 6);
   }, [allAssets]);
-
   const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(221.2 83.2% 53.3%)'];
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <AssetTopBar />
         <div className="px-4 space-y-4 mt-2">
           <div className="flex gap-2">
@@ -134,12 +150,9 @@ export default function HelpdeskAssets() {
             {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <Skeleton key={i} className="h-24" />)}
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <AssetTopBar />
       
       <div className="px-4 space-y-4 mt-2">
@@ -149,18 +162,12 @@ export default function HelpdeskAssets() {
             <Plus className="w-4 h-4 mr-1" />
             Add Asset
           </Button>
-          <Button size="sm" variant="outline" onClick={() => navigate("/helpdesk/assets/allassets")}>
-            <List className="w-4 h-4 mr-1" />
-            All Assets
-          </Button>
+          
           <Button size="sm" variant="outline" onClick={() => navigate("/helpdesk/assets/allassets")}>
             <CheckCircle className="w-4 h-4 mr-1" />
             Available
           </Button>
-          <Button size="sm" variant="outline" onClick={() => navigate("/helpdesk/assets/audit")}>
-            <Clock className="w-4 h-4 mr-1" />
-            Recent Actions
-          </Button>
+          
         </div>
 
         {/* KPI Cards Grid */}
@@ -243,19 +250,7 @@ export default function HelpdeskAssets() {
           </Card>
 
           {/* Retired Assets */}
-          <Card className="hover:shadow-sm transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Retired</p>
-                  <p className="text-2xl font-bold">{metrics.retiredAssets}</p>
-                </div>
-                <div className="w-8 h-8 rounded-md bg-gray-500/10 flex items-center justify-center">
-                  <Package className="w-4 h-4 text-gray-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          
 
           {/* Total Asset Value */}
           <Card className="hover:shadow-sm transition-shadow">
@@ -273,68 +268,16 @@ export default function HelpdeskAssets() {
           </Card>
 
           {/* Net Book Value */}
-          <Card className="hover:shadow-sm transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Net Book Value</p>
-                  <p className="text-xl font-bold">₹{(metrics.netBookValue / 100000).toFixed(1)}L</p>
-                </div>
-                <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center">
-                  <TrendingDown className="w-4 h-4 text-indigo-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          
         </div>
 
         {/* Charts and Depreciation */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Status Distribution - Pie Chart */}
-          <Card>
-            <CardContent className="p-4">
-              <h3 className="text-sm font-semibold mb-3">Status Distribution</h3>
-              <Suspense fallback={<Skeleton className="h-48" />}>
-                <ResponsiveContainer width="100%" height={180}>
-                  <PieChart>
-                    <Pie
-                      data={statusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={40}
-                      outerRadius={70}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {statusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Suspense>
-            </CardContent>
-          </Card>
+          
 
           {/* Category Breakdown - Bar Chart */}
-          <Card>
-            <CardContent className="p-4">
-              <h3 className="text-sm font-semibold mb-3">Category Breakdown</h3>
-              <Suspense fallback={<Skeleton className="h-48" />}>
-                <ResponsiveContainer width="100%" height={180}>
-                  <BarChart data={categoryData}>
-                    <Tooltip />
-                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                      {categoryData.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </Suspense>
-            </CardContent>
-          </Card>
+          
 
           {/* Depreciation Summary */}
           <Card>
@@ -368,8 +311,7 @@ export default function HelpdeskAssets() {
               </Button>
             </div>
             <div className="space-y-2">
-              {recentEvents.slice(0, 5).map((event: any) => (
-                <div key={event.id} className="flex items-center justify-between py-2 border-b last:border-0">
+              {recentEvents.slice(0, 5).map((event: any) => <div key={event.id} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div className="flex-1">
                     <p className="text-sm font-medium">{event.itam_assets?.asset_tag || 'N/A'}</p>
                     <p className="text-xs text-muted-foreground">{event.event_type} • {event.itam_assets?.name}</p>
@@ -377,15 +319,11 @@ export default function HelpdeskAssets() {
                   <p className="text-xs text-muted-foreground">
                     {new Date(event.created_at).toLocaleDateString()}
                   </p>
-                </div>
-              ))}
-              {recentEvents.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
-              )}
+                </div>)}
+              {recentEvents.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>}
             </div>
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
