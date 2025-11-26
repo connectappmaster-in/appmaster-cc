@@ -477,26 +477,11 @@ export const CreateAssetDialog = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories.length > 0 ? (
-                            categories.map((category) => (
-                              <SelectItem key={category.id} value={category.name}>
-                                {category.name}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <>
-                              <SelectItem value="Laptop">Laptop</SelectItem>
-                              <SelectItem value="Desktop">Desktop</SelectItem>
-                              <SelectItem value="Monitor">Monitor</SelectItem>
-                              <SelectItem value="Printer">Printer</SelectItem>
-                              <SelectItem value="Phone">Phone</SelectItem>
-                              <SelectItem value="Tablet">Tablet</SelectItem>
-                              <SelectItem value="Server">Server</SelectItem>
-                              <SelectItem value="Network Device">Network Device</SelectItem>
-                              <SelectItem value="Furniture">Furniture</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
-                            </>
-                          )}
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.name}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
