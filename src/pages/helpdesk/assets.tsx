@@ -2,8 +2,9 @@ import { AssetTopBar } from "@/components/ITAM/AssetTopBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Package, Plus, List, Clock, TrendingDown, DollarSign, AlertCircle, Wrench, CheckCircle } from "lucide-react";
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { CreateAssetDialog } from "@/components/ITAM/CreateAssetDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,6 +33,7 @@ const Tooltip = lazy(() => import("recharts").then(mod => ({
 })));
 export default function HelpdeskAssets() {
   const navigate = useNavigate();
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   // Optimized parallel data fetching
   const {
@@ -158,7 +160,10 @@ export default function HelpdeskAssets() {
       <div className="px-3 space-y-3 mt-2">
         {/* Quick Actions Row */}
         <div className="flex gap-2 flex-wrap">
-          
+          <Button size="sm" onClick={() => setCreateDialogOpen(true)} className="gap-1.5 h-8">
+            <Plus className="h-3.5 w-3.5" />
+            <span className="text-sm">Add Asset</span>
+          </Button>
           
           <Button size="sm" variant="outline" onClick={() => navigate("/helpdesk/assets/allassets?status=available")}>
             <CheckCircle className="w-4 h-4 mr-1" />
@@ -340,5 +345,7 @@ export default function HelpdeskAssets() {
           </Card>
         </div>
       </div>
+
+      <CreateAssetDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
     </div>;
 }
