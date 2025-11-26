@@ -1,7 +1,7 @@
 import { AssetTopBar } from "@/components/ITAM/AssetTopBar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, TrendingUp, Package, DollarSign, Calendar, ClipboardCheck, MapPin, Users, AlertTriangle, Activity, ShieldCheck, BarChart3 } from "lucide-react";
+import { FileText, Download, Package, Calendar, ClipboardCheck, AlertTriangle, Activity, ShieldCheck, BarChart3 } from "lucide-react";
 import { useAssetReports } from "@/hooks/useAssetReports";
 import { generateCSV, downloadCSV, formatCurrency, formatDate } from "@/lib/reportUtils";
 import { toast } from "sonner";
@@ -45,45 +45,6 @@ const AssetReports = () => {
     const csv = generateCSV(data, headers);
     downloadCSV(csv, "assignment_history_report");
     toast.success("Assignment History Report downloaded successfully");
-  };
-  const generateRepairCostReport = () => {
-    if (!reportData?.maintenance.length) {
-      toast.error("No maintenance records found");
-      return;
-    }
-    const headers = ["Asset ID", "Issue Description", "Cost", "Status", "Created At", "Resolved At"];
-    const data = reportData.maintenance.map(record => ({
-      "Asset ID": record.asset_id,
-      "Issue Description": record.issue_description,
-      Cost: formatCurrency(record.cost),
-      Status: record.status || "N/A",
-      "Created At": formatDate(record.created_at),
-      "Resolved At": formatDate(record.resolved_at)
-    }));
-    const csv = generateCSV(data, headers);
-    downloadCSV(csv, "repair_cost_analysis_report");
-    toast.success("Repair Cost Analysis Report downloaded successfully");
-  };
-  const generateUtilizationReport = () => {
-    if (!reportData?.assets.length && !reportData?.licenses.length) {
-      toast.error("No data found to generate report");
-      return;
-    }
-    const assignedAssets = reportData.assignments.filter(a => !a.returned_at).length;
-    const totalAssets = reportData.assets.length;
-    const utilizationRate = totalAssets > 0 ? (assignedAssets / totalAssets * 100).toFixed(2) : "0.00";
-    const licenseUtilization = reportData.licenses.map(license => ({
-      "License Name": license.name,
-      "Software Name": license.software_name,
-      "Total Seats": license.seats_total,
-      "Used Seats": license.seats_used,
-      "Available Seats": license.seats_total - license.seats_used,
-      "Utilization %": license.seats_total > 0 ? (license.seats_used / license.seats_total * 100).toFixed(2) : "0.00"
-    }));
-    const headers = ["License Name", "Software Name", "Total Seats", "Used Seats", "Available Seats", "Utilization %"];
-    const csv = generateCSV(licenseUtilization, headers);
-    downloadCSV(csv, "utilization_report");
-    toast.success("Utilization Report downloaded successfully");
   };
   const generateWarrantyExpiryReport = () => {
     if (!reportData?.warranties.length) {
@@ -210,18 +171,6 @@ const AssetReports = () => {
     action: generateAssignmentHistoryReport,
     count: reportData?.assignments.length || 0
   }, {
-    title: "Repair Cost Analysis",
-    description: "Analysis of repair and maintenance costs",
-    icon: DollarSign,
-    action: generateRepairCostReport,
-    count: reportData?.maintenance.length || 0
-  }, {
-    title: "Utilization Report",
-    description: "Asset and license utilization metrics",
-    icon: TrendingUp,
-    action: generateUtilizationReport,
-    count: reportData?.assets.length || 0
-  }, {
     title: "Warranty Expiry Report",
     description: "Assets with expiring warranties",
     icon: ShieldCheck,
@@ -261,28 +210,23 @@ const AssetReports = () => {
   return <div className="min-h-screen bg-background">
       <AssetTopBar />
       
-      <div className="px-4 py-6 space-y-6">
-        <div>
-          
-          
-        </div>
-
-        {isLoading ? <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {reports.map(report => <Card key={report.title} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <report.icon className="h-6 w-6 text-primary" />
+      <div className="px-4 py-3 space-y-3">
+        {isLoading ? <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+            {reports.map(report => <Card key={report.title} className="p-3 hover:shadow-md transition-shadow border hover:border-primary/50">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <report.icon className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
+                  <div className="text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                     {report.count} records
                   </div>
                 </div>
-                <h3 className="font-semibold mb-2">{report.title}</h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{report.description}</p>
-                <Button size="sm" variant="outline" className="w-full" onClick={report.action} disabled={report.count === 0}>
-                  <Download className="h-4 w-4 mr-2" />
+                <h3 className="font-semibold text-sm mb-1.5">{report.title}</h3>
+                <p className="text-xs text-muted-foreground mb-2.5 line-clamp-2">{report.description}</p>
+                <Button size="sm" variant="outline" className="w-full h-7 text-xs" onClick={report.action} disabled={report.count === 0}>
+                  <Download className="h-3 w-3 mr-1.5" />
                   Generate Report
                 </Button>
               </Card>)}
