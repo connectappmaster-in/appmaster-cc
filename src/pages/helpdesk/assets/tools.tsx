@@ -22,21 +22,35 @@ export default function ToolsPage() {
   const [exportFormat, setExportFormat] = useState<'csv' | 'excel'>('csv');
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
-  // Fetch asset photos for gallery
+  // Fetch asset photos from storage bucket
   const {
     data: assetPhotos,
     refetch: refetchPhotos
   } = useQuery({
-    queryKey: ['asset-photos'],
+    queryKey: ['asset-photos-storage'],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('asset_photos').select('*, itam_assets(asset_id, brand, model)').order('created_at', {
-        ascending: false
-      });
+      const { data, error } = await supabase.storage
+        .from('asset-photos')
+        .list();
+
       if (error) throw error;
-      return data;
+
+      // Get public URLs for all files
+      const photosWithUrls = data.map(file => {
+        const { data: { publicUrl } } = supabase.storage
+          .from('asset-photos')
+          .getPublicUrl(file.name);
+        
+        return {
+          id: file.id,
+          name: file.name,
+          photo_url: publicUrl,
+          created_at: file.created_at,
+          metadata: file.metadata
+        };
+      });
+
+      return photosWithUrls;
     }
   });
 
@@ -44,32 +58,17 @@ export default function ToolsPage() {
   const uploadPhotoMutation = useMutation({
     mutationFn: async (file: File) => {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('asset-photos')
-        .upload(filePath, file);
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('asset-photos')
-        .getPublicUrl(filePath);
-
-      const { error: dbError } = await supabase
-        .from('asset_photos')
-        .insert({
-          photo_url: publicUrl,
-          asset_id: 0, // Placeholder, should be updated when assigning to an asset
-          tenant_id: 1 // Should be dynamic based on user's tenant
-        });
-
-      if (dbError) throw dbError;
     },
     onSuccess: () => {
       toast.success('Photo uploaded successfully');
-      queryClient.invalidateQueries({ queryKey: ['asset-photos'] });
+      queryClient.invalidateQueries({ queryKey: ['asset-photos-storage'] });
       refetchPhotos();
     },
     onError: (error) => {
@@ -81,26 +80,15 @@ export default function ToolsPage() {
   // Delete photo mutation
   const deletePhotoMutation = useMutation({
     mutationFn: async (photo: any) => {
-      // Extract file path from URL
-      const url = new URL(photo.photo_url);
-      const filePath = url.pathname.split('/').pop();
-
       const { error: storageError } = await supabase.storage
         .from('asset-photos')
-        .remove([filePath || '']);
+        .remove([photo.name]);
 
       if (storageError) throw storageError;
-
-      const { error: dbError } = await supabase
-        .from('asset_photos')
-        .delete()
-        .eq('id', photo.id);
-
-      if (dbError) throw dbError;
     },
     onSuccess: () => {
       toast.success('Photo deleted successfully');
-      queryClient.invalidateQueries({ queryKey: ['asset-photos'] });
+      queryClient.invalidateQueries({ queryKey: ['asset-photos-storage'] });
       refetchPhotos();
     },
     onError: (error) => {
@@ -290,7 +278,15 @@ export default function ToolsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                   {assetPhotos?.map((photo: any) => <div key={photo.id} className="relative group">
                       <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                        <img src={photo.photo_url} alt="Asset" className="w-full h-full object-cover hover:scale-110 transition-transform" />
+                        <img 
+                          src={photo.photo_url} 
+                          alt={photo.name} 
+                          className="w-full h-full object-cover hover:scale-110 transition-transform" 
+                          onError={(e) => {
+                            console.error('Failed to load image:', photo.photo_url);
+                            e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23ddd" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999"%3ENo Image%3C/text%3E%3C/svg%3E';
+                          }}
+                        />
                       </div>
                       <Button
                         variant="destructive"
@@ -305,11 +301,11 @@ export default function ToolsPage() {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                       <div className="text-xs mt-2">
-                        <p className="font-medium truncate">
-                          {photo.itam_assets?.brand} {photo.itam_assets?.model}
+                        <p className="font-medium truncate" title={photo.name}>
+                          {photo.name}
                         </p>
-                        <p className="text-muted-foreground">
-                          {photo.itam_assets?.asset_id || 'Unassigned'}
+                        <p className="text-muted-foreground text-[10px]">
+                          {photo.created_at ? format(new Date(photo.created_at), 'MMM dd, yyyy') : ''}
                         </p>
                       </div>
                     </div>)}
