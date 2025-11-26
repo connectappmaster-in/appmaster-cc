@@ -4,7 +4,7 @@ import { AssetTopBar } from "@/components/ITAM/AssetTopBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Upload, Download, FileImage, QrCode, Barcode, FileText, History, Wrench, TrendingUp, Package } from "lucide-react";
+import { Upload, Download, FileImage, Wrench, TrendingUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,23 +32,6 @@ export default function ToolsPage() {
       } = await supabase.from('asset_photos').select('*, itam_assets(asset_id, brand, model)').order('created_at', {
         ascending: false
       });
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  // Fetch audit logs
-  const {
-    data: auditLogs
-  } = useQuery({
-    queryKey: ['asset-events'],
-    queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('asset_events').select('*, itam_assets(asset_id, brand, model)').order('performed_at', {
-        ascending: false
-      }).limit(50);
       if (error) throw error;
       return data;
     }
@@ -215,79 +198,7 @@ export default function ToolsPage() {
             </DialogContent>
           </Dialog>
 
-          {/* Audit Trail */}
-          <Dialog>
-            <DialogTrigger asChild>
-              <Card className="border hover:border-primary/50 transition-all hover:shadow-md cursor-pointer">
-                <CardHeader className="pb-2">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-1.5">
-                    <History className="h-4 w-4 text-primary" />
-                  </div>
-                  <CardTitle className="text-sm font-semibold">Audit Trail</CardTitle>
-                  <CardDescription className="text-xs">
-                    Asset history logs
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xs text-muted-foreground mb-2">
-                    {auditLogs?.length || 0} events
-                  </div>
-                  <Button variant="outline" className="w-full h-7 text-xs">
-                    View Logs
-                  </Button>
-                </CardContent>
-              </Card>
-            </DialogTrigger>
-            <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Asset Audit Trail</DialogTitle>
-                <DialogDescription>
-                  Complete history of asset events and changes
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-4">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date/Time</TableHead>
-                      <TableHead>Asset</TableHead>
-                      <TableHead>Event Type</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Performed By</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {auditLogs?.map((log: any) => <TableRow key={log.id}>
-                        <TableCell className="text-xs">
-                          {log.performed_at ? format(new Date(log.performed_at), 'MMM dd, yyyy HH:mm') : '—'}
-                        </TableCell>
-                        <TableCell className="text-xs font-medium">
-                          {log.itam_assets?.asset_id || '—'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs">
-                            {log.event_type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          {log.event_description || '—'}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {log.performed_by || '—'}
-                        </TableCell>
-                      </TableRow>)}
-                    {(!auditLogs || auditLogs.length === 0) && <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                          No audit logs available
-                        </TableCell>
-                      </TableRow>}
-                  </TableBody>
-                </Table>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          {/* QR Code Generator */}
+          {/* Depreciation */}
           
 
           {/* Barcode Scanner */}
@@ -310,45 +221,6 @@ export default function ToolsPage() {
             <CardContent>
               <Button variant="outline" className="w-full h-7 text-xs">
                 Manage Lifecycle
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Purchase Orders */}
-          
-
-          {/* Vendor Management */}
-          <Card className="border hover:border-primary/50 transition-all hover:shadow-md cursor-pointer" onClick={() => navigate('/helpdesk/assets/vendors')}>
-            <CardHeader className="pb-2">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-1.5">
-                <Package className="h-4 w-4 text-primary" />
-              </div>
-              <CardTitle className="text-sm font-semibold">Vendors</CardTitle>
-              <CardDescription className="text-xs">
-                Manage asset vendors
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full h-7 text-xs">
-                View Vendors
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* License Management */}
-          <Card className="border hover:border-primary/50 transition-all hover:shadow-md cursor-pointer" onClick={() => navigate('/helpdesk/assets/licenses')}>
-            <CardHeader className="pb-2">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-1.5">
-                <FileText className="h-4 w-4 text-primary" />
-              </div>
-              <CardTitle className="text-sm font-semibold">Licenses</CardTitle>
-              <CardDescription className="text-xs">
-                Software license tracking
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full h-7 text-xs">
-                Manage Licenses
               </Button>
             </CardContent>
           </Card>
