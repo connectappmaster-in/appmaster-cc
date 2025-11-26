@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface AssetsListProps {
   status?: string;
@@ -46,6 +47,8 @@ export const AssetsList = ({ status, filters = {}, onSelectionChange }: AssetsLi
   const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+  const [deleteAssetId, setDeleteAssetId] = useState<number | null>(null);
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -151,8 +154,10 @@ export const AssetsList = ({ status, filters = {}, onSelectionChange }: AssetsLi
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${selectedAssets.length} asset(s)?`)) return;
-    
+    setBulkDeleteConfirmOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
     try {
       const { error } = await supabase
         .from('itam_assets')
@@ -524,19 +529,7 @@ export const AssetsList = ({ status, filters = {}, onSelectionChange }: AssetsLi
                       </DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive" onClick={async (e) => {
                         e.stopPropagation();
-                        if (!confirm('Are you sure you want to delete this asset?')) return;
-                        try {
-                          const { error } = await supabase
-                            .from('itam_assets')
-                            .update({ is_deleted: true })
-                            .eq('id', asset.id);
-                          if (error) throw error;
-                          toast.success('Asset deleted');
-                          queryClient.invalidateQueries({ queryKey: ["assets"] });
-                          queryClient.invalidateQueries({ queryKey: ["assets-count"] });
-                        } catch (error: any) {
-                          toast.error("Failed to delete asset: " + error.message);
-                        }
+                        setDeleteAssetId(asset.id);
                       }}>
                         Delete
                       </DropdownMenuItem>
@@ -564,6 +557,44 @@ export const AssetsList = ({ status, filters = {}, onSelectionChange }: AssetsLi
           onOpenChange={(open) => !open && setAssignAsset(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={bulkDeleteConfirmOpen}
+        onOpenChange={setBulkDeleteConfirmOpen}
+        onConfirm={() => {
+          confirmBulkDelete();
+          setBulkDeleteConfirmOpen(false);
+        }}
+        title="Delete Assets"
+        description={`Are you sure you want to delete ${selectedAssets.length} asset(s)? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="destructive"
+      />
+
+      <ConfirmDialog
+        open={deleteAssetId !== null}
+        onOpenChange={(open) => !open && setDeleteAssetId(null)}
+        onConfirm={async () => {
+          if (deleteAssetId === null) return;
+          try {
+            const { error } = await supabase
+              .from('itam_assets')
+              .update({ is_deleted: true })
+              .eq('id', deleteAssetId);
+            if (error) throw error;
+            toast.success('Asset deleted');
+            queryClient.invalidateQueries({ queryKey: ["assets"] });
+            queryClient.invalidateQueries({ queryKey: ["assets-count"] });
+          } catch (error: any) {
+            toast.error("Failed to delete asset: " + error.message);
+          }
+          setDeleteAssetId(null);
+        }}
+        title="Delete Asset"
+        description="Are you sure you want to delete this asset? This action cannot be undone."
+        confirmText="Delete"
+        variant="destructive"
+      />
     </>
   );
 };

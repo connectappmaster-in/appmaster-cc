@@ -13,6 +13,8 @@ import { Loader2, Image as ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ImagePickerDialog } from "./ImagePickerDialog";
 import { useAssetSetupConfig } from "@/hooks/useAssetSetupConfig";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+
 const assetSchema = z.object({
   asset_id: z.string().min(1, "Asset ID is required"),
   brand: z.string().min(1, "Make is required"),
@@ -44,6 +46,7 @@ export const EditAssetDialog = ({
 }: EditAssetDialogProps) => {
   const queryClient = useQueryClient();
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const { sites, locations, categories, departments, makes } = useAssetSetupConfig();
    
   const form = useForm<z.infer<typeof assetSchema>>({
@@ -490,11 +493,7 @@ export const EditAssetDialog = ({
             />
 
             <div className="flex justify-between pt-3 border-t">
-              <Button type="button" variant="destructive" onClick={() => {
-              if (confirm("Are you sure you want to delete this asset?")) {
-                deleteAsset.mutate();
-              }
-            }} disabled={updateAsset.isPending || deleteAsset.isPending}>
+              <Button type="button" variant="destructive" onClick={() => setDeleteConfirmOpen(true)} disabled={updateAsset.isPending || deleteAsset.isPending}>
                 {deleteAsset.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Delete
               </Button>
@@ -511,5 +510,18 @@ export const EditAssetDialog = ({
           </form>
         </Form>
       </DialogContent>
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        onConfirm={() => {
+          deleteAsset.mutate();
+          setDeleteConfirmOpen(false);
+        }}
+        title="Delete Asset"
+        description="Are you sure you want to delete this asset? This action cannot be undone."
+        confirmText="Delete"
+        variant="destructive"
+      />
     </Dialog>;
 };
