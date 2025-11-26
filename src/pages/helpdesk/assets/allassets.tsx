@@ -7,13 +7,13 @@ import { Search, Plus, UserCheck, Wrench, Settings, Package, ChevronDown } from 
 import { AssetsList } from "@/components/ITAM/AssetsList";
 import { CreateAssetDialog } from "@/components/ITAM/CreateAssetDialog";
 import { AssetTopBar } from "@/components/ITAM/AssetTopBar";
-
+import { useAssetSetupConfig } from "@/hooks/useAssetSetupConfig";
 export default function AllAssets() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [selectedAssetIds, setSelectedAssetIds] = useState<number[]>([]);
   const [bulkActions, setBulkActions] = useState<any>(null);
-
+  const { categories } = useAssetSetupConfig();
   return (
     <div className="min-h-screen bg-background">
       <AssetTopBar />
@@ -91,16 +91,11 @@ export default function AllAssets() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Laptop">Laptop</SelectItem>
-                <SelectItem value="Desktop">Desktop</SelectItem>
-                <SelectItem value="Monitor">Monitor</SelectItem>
-                <SelectItem value="Printer">Printer</SelectItem>
-                <SelectItem value="Phone">Phone</SelectItem>
-                <SelectItem value="Tablet">Tablet</SelectItem>
-                <SelectItem value="Server">Server</SelectItem>
-                <SelectItem value="Network Device">Network Device</SelectItem>
-                <SelectItem value="Furniture">Furniture</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.name}>
+                    {category.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
