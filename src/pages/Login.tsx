@@ -243,15 +243,15 @@ const Login = () => {
                 </form>}
             </>) : (/* Signup Form - Multi-step */
         <>
-              {signupStep === 1 && <form onSubmit={handleSignupNext} className="space-y-4">
-                  <button type="button" onClick={handleBackInSignup} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-                    <ArrowLeft className="h-4 w-4" />
-                    Back
-                  </button>
-
+              {signupStep === 1 && <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Account Type</Label>
-                    <ToggleGroup type="single" value={accountType} onValueChange={value => value && setAccountType(value as 'personal' | 'organization')} className="justify-start">
+                    <ToggleGroup type="single" value={accountType} onValueChange={value => {
+                      if (value) {
+                        setAccountType(value as 'personal' | 'organization');
+                        setSignupStep(2);
+                      }
+                    }} className="justify-start">
                       <ToggleGroupItem value="personal" className="flex-1">
                         Individual
                       </ToggleGroupItem>
@@ -260,11 +260,7 @@ const Login = () => {
                       </ToggleGroupItem>
                     </ToggleGroup>
                   </div>
-
-                  <Button type="submit" className="w-full">
-                    Next
-                  </Button>
-                </form>}
+                </div>}
 
               {signupStep === 2 && <form onSubmit={handleSignupNext} className="space-y-4">
                   <button type="button" onClick={handleBackInSignup} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
