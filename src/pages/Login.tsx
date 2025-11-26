@@ -278,17 +278,6 @@ const Login = () => {
                     <ArrowLeft className="h-4 w-4" />
                     Back
                   </button>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email-display">Email</Label>
-                    <Input
-                      id="email-display"
-                      type="email"
-                      value={email}
-                      disabled
-                      className="bg-muted"
-                    />
-                  </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
