@@ -57,22 +57,9 @@ import HelpdeskSettings from "./pages/helpdesk/settings";
 import HelpdeskQueues from "./pages/helpdesk/queues";
 import HelpdeskSLA from "./pages/helpdesk/sla";
 import HelpdeskReports from "./pages/helpdesk/reports";
-import HelpdeskSRM from "./pages/helpdesk/srm/index";
 import HelpdeskMonitoring from "./pages/helpdesk/monitoring";
 import HelpdeskSystemUpdates from "./pages/helpdesk/system-updates";
 import HelpdeskAudit from "./pages/helpdesk/audit";
-// Service Requests imports
-import ServiceRequestsIndex from "./pages/helpdesk/service-requests/index";
-import ServiceRequestForm from "./pages/helpdesk/service-requests/request-form";
-import ServiceRequestDetail from "./pages/helpdesk/service-requests/detail/[requestId]";
-import ServiceRequestApprovals from "./pages/helpdesk/service-requests/approvals";
-import ServiceRequestAssignmentRules from "./pages/helpdesk/service-requests/assignment-rules";
-import ServiceRequestReports from "./pages/helpdesk/service-requests/reports";
-import ServiceRequestMyRequests from "./pages/helpdesk/service-requests/my-requests";
-import ChangeManagementIndex from "./pages/helpdesk/service-requests/change-management/index";
-import ChangeManagementDetail from "./pages/helpdesk/service-requests/change-management/detail/[changeId]";
-import ChangeManagementCalendar from "./pages/helpdesk/service-requests/change-management/calendar";
-import ChangeManagementApprovals from "./pages/helpdesk/service-requests/change-management/approvals";
 
 import Assets from "./pages/assets";
 import ShopIncomeExpense from "./pages/shop-income-expense";
@@ -114,8 +101,6 @@ import SuperAdminTools from "./pages/super-admin/tools";
 import { BroadcastBanner } from "./components/BroadcastBanner";
 import AppDetailPage from "./pages/apps/[slug]";
 import Notifications from "./pages/Notifications";
-import SRM from "./pages/srm/index";
-import RequestDetail from "./pages/srm/RequestDetail";
 import ITAM from "./pages/itam/index";
 
 const queryClient = new QueryClient({
@@ -175,23 +160,6 @@ const App = () => {
             <Route path="tickets" element={<HelpdeskTickets />} />
             <Route path="tickets/:id" element={<TicketDetail />} />
             <Route path="new" element={<NewTicket />} />
-            <Route path="srm" element={<HelpdeskSRM />} />
-            
-            {/* Service Requests Routes */}
-            <Route path="service-requests" element={<ServiceRequestsIndex />} />
-            <Route path="service-requests/request-form" element={<ServiceRequestForm />} />
-            <Route path="service-requests/detail/:requestId" element={<ServiceRequestDetail />} />
-            <Route path="service-requests/approvals" element={<ServiceRequestApprovals />} />
-            <Route path="service-requests/assignment-rules" element={<ServiceRequestAssignmentRules />} />
-            <Route path="service-requests/reports" element={<ServiceRequestReports />} />
-            <Route path="service-requests/my-requests" element={<ServiceRequestMyRequests />} />
-            
-            {/* Change Management Routes */}
-            <Route path="service-requests/change-management" element={<ChangeManagementIndex />} />
-            <Route path="service-requests/change-management/detail/:changeId" element={<ChangeManagementDetail />} />
-            <Route path="service-requests/change-management/calendar" element={<ChangeManagementCalendar />} />
-            <Route path="service-requests/change-management/approvals" element={<ChangeManagementApprovals />} />
-            
             <Route path="assets" element={<HelpdeskAssets />} />
             <Route path="assets/allassets" element={<AllAssets />} />
             <Route path="assets/detail/:assetId" element={<AssetDetail />} />
@@ -227,8 +195,6 @@ const App = () => {
             <Route path="sla" element={<HelpdeskSLA />} />
           </Route>
           
-          <Route path="/srm" element={<ToolAccessGuard toolKey="srm"><SRM /></ToolAccessGuard>} />
-          <Route path="/srm/request/:requestId" element={<ToolAccessGuard toolKey="srm"><RequestDetail /></ToolAccessGuard>} />
           <Route path="/itam" element={<ToolAccessGuard toolKey="itam"><ITAM /></ToolAccessGuard>} />
           <Route path="/assets" element={<ToolAccessGuard toolKey="assets"><Assets /></ToolAccessGuard>} />
           <Route path="/shop-income-expense" element={<ShopIncomeExpense />} />
