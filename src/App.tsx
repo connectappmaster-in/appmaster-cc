@@ -42,7 +42,6 @@ import AssetsBulkActions from "./pages/helpdesk/assets/explore/bulk-actions";
 import AssetsReports from "./pages/helpdesk/assets/explore/reports";
 import AssetsTools from "./pages/helpdesk/assets/tools";
 import AssetsFieldsSetup from "./pages/helpdesk/assets/setup/fields-setup";
-import HelpdeskKB from "./pages/helpdesk/kb";
 import HelpdeskProblemDetail from "./pages/helpdesk/problems/[id]";
 import HelpdeskChanges from "./pages/helpdesk/changes";
 import HelpdeskAutomation from "./pages/helpdesk/automation";
@@ -181,7 +180,6 @@ const App = () => {
               <Route path="payments" element={<HelpdeskSubscriptionPayments />} />
             </Route>
             <Route path="system-updates" element={<HelpdeskSystemUpdates />} />
-            <Route path="kb" element={<HelpdeskKB />} />
             <Route path="monitoring" element={<HelpdeskMonitoring />} />
             <Route path="reports" element={<HelpdeskReports />} />
             <Route path="audit" element={<HelpdeskAudit />} />
