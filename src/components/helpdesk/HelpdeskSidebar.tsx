@@ -54,9 +54,9 @@ export function HelpdeskSidebar() {
     return currentPath.startsWith(path);
   };
   return <div className="h-screen flex flex-col bg-background transition-all duration-300 ease-in-out border-r border-border" style={{
-    width: collapsed ? "50px" : "180px",
-    minWidth: collapsed ? "50px" : "180px",
-    maxWidth: collapsed ? "50px" : "180px"
+    width: collapsed ? "56px" : "160px",
+    minWidth: collapsed ? "56px" : "160px",
+    maxWidth: collapsed ? "56px" : "160px"
   }}>
       {/* Header - matches navbar height */}
       <div className="flex items-center justify-center border-b border-border px-2" style={{
@@ -70,11 +70,9 @@ export function HelpdeskSidebar() {
         <nav className="space-y-1 px-2">
           {navItems.map(item => {
           const active = isActive(item.url);
-          const menuButton = <NavLink to={item.url} end={item.url === "/helpdesk"} className={`flex items-center h-9 rounded-lg relative transition-colors duration-200 font-medium text-sm ${active ? "text-primary bg-accent" : "text-foreground hover:text-primary hover:bg-accent/50"}`}>
-                
-                <div className={`transition-all duration-300 overflow-hidden whitespace-nowrap flex items-center gap-2 ${collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
-                  <span className="text-sm font-medium">{item.title}</span>
-                </div>
+          const menuButton = <NavLink to={item.url} end={item.url === "/helpdesk"} className={`flex items-center h-9 px-3 rounded-lg relative transition-colors duration-200 font-medium text-sm ${active ? "text-primary bg-accent" : "text-foreground hover:text-primary hover:bg-accent/50"}`}>
+                <item.icon className={`h-4 w-4 flex-shrink-0 ${collapsed ? "" : "mr-3"}`} />
+                {!collapsed && <span className="text-sm font-medium">{item.title}</span>}
               </NavLink>;
           if (collapsed) {
             return <TooltipProvider key={item.title}>
@@ -96,13 +94,9 @@ export function HelpdeskSidebar() {
         {/* Collapse Toggle */}
         <div>
           {(() => {
-          const collapseButton = <button onClick={toggleSidebar} className="flex items-center h-9 w-full rounded-lg transition-colors font-medium text-sm text-foreground/70 hover:text-primary hover:bg-accent/50">
-                <div className="w-9 h-9 flex items-center justify-center flex-shrink-0">
-                  <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
-                </div>
-                <div className={`transition-all duration-300 overflow-hidden whitespace-nowrap ${collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
-                  <span className="text-sm font-medium">Collapse</span>
-                </div>
+          const collapseButton = <button onClick={toggleSidebar} className="flex items-center h-9 w-full px-3 rounded-lg transition-colors font-medium text-sm text-foreground/70 hover:text-primary hover:bg-accent/50">
+                <ChevronLeft className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${collapsed ? "rotate-180 mx-auto" : "mr-3"}`} />
+                {!collapsed && <span className="text-sm font-medium">Collapse</span>}
               </button>;
           if (collapsed) {
             return <TooltipProvider>
