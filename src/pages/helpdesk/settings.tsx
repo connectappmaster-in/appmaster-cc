@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Building2, Bell, Mail, Clock, Shield, Palette, Users } from "lucide-react";
+import { Bell, Mail, Clock, Shield, Palette, Users } from "lucide-react";
 import { OrgUsersManager } from "@/components/OrgAdmin/OrgUsersManager";
 import { useRole } from "@/hooks/useRole";
 export default function SettingsModule() {
@@ -37,7 +37,7 @@ export default function SettingsModule() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
+                
                 <CardTitle>Organization Details</CardTitle>
               </div>
             </CardHeader>
