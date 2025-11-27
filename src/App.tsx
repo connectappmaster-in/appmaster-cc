@@ -59,7 +59,6 @@ import HelpdeskReports from "./pages/helpdesk/reports";
 import HelpdeskMonitoring from "./pages/helpdesk/monitoring";
 import HelpdeskSystemUpdates from "./pages/helpdesk/system-updates";
 import HelpdeskAudit from "./pages/helpdesk/audit";
-
 import Assets from "./pages/assets";
 import ShopIncomeExpense from "./pages/shop-income-expense";
 import CRM from "./pages/crm";
@@ -74,7 +73,6 @@ import ReportIssue from "./pages/ReportIssue";
 import Admin from "./pages/admin/index";
 import Login from "./pages/Login";
 import AuthConfirm from "./pages/AuthConfirm";
-
 import Profile from "./pages/Profile";
 import InitializeAdmin from "./pages/InitializeAdmin";
 import PasswordReset from "./pages/PasswordReset";
@@ -101,19 +99,16 @@ import { BroadcastBanner } from "./components/BroadcastBanner";
 import AppDetailPage from "./pages/apps/[slug]";
 import Notifications from "./pages/Notifications";
 import ITAM from "./pages/itam/index";
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
-      retry: 1,
-    },
-  },
+      retry: 1
+    }
+  }
 });
-
 const App = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
+  return <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -155,7 +150,7 @@ const App = () => {
           
           {/* Helpdesk Routes - All under /helpdesk */}
           <Route path="/helpdesk" element={<ToolAccessGuard toolKey="helpdesk"><HelpdeskLayout /></ToolAccessGuard>}>
-            <Route index element={<HelpdeskDashboard />} />
+            
             <Route path="tickets" element={<HelpdeskTickets />} />
             <Route path="tickets/:id" element={<TicketDetail />} />
             <Route path="new" element={<NewTicket />} />
@@ -232,8 +227,6 @@ const App = () => {
           </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
-  );
+  </QueryClientProvider>;
 };
-
 export default App;
