@@ -1,7 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutDashboard, Package, Wrench, FileText, Settings } from "lucide-react";
-
 export const AssetTopBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,7 +14,6 @@ export const AssetTopBar = () => {
     if (path.includes("/setup")) return "setup";
     return "overview";
   };
-
   const handleTabChange = (value: string) => {
     switch (value) {
       case "overview":
@@ -36,35 +33,32 @@ export const AssetTopBar = () => {
         break;
     }
   };
-
-  return (
-    <div className="w-full px-4 pt-2 pb-3">
+  return <div className="w-full px-4 pt-2 pb-3">
       <Tabs value={getActiveTab()} onValueChange={handleTabChange}>
         <div className="flex items-center gap-2 flex-wrap">
           <TabsList className="h-8">
             <TabsTrigger value="overview" className="gap-1.5 px-3 text-sm h-7">
-              <LayoutDashboard className="h-3.5 w-3.5" />
+              
               Overview
             </TabsTrigger>
             <TabsTrigger value="all" className="gap-1.5 px-3 text-sm h-7">
-              <Package className="h-3.5 w-3.5" />
+              
               All Assets
             </TabsTrigger>
             <TabsTrigger value="tools" className="gap-1.5 px-3 text-sm h-7">
-              <Wrench className="h-3.5 w-3.5" />
+              
               Tools
             </TabsTrigger>
             <TabsTrigger value="reports" className="gap-1.5 px-3 text-sm h-7">
-              <FileText className="h-3.5 w-3.5" />
+              
               Reports
             </TabsTrigger>
             <TabsTrigger value="setup" className="gap-1.5 px-3 text-sm h-7">
-              <Settings className="h-3.5 w-3.5" />
+              
               Setup
             </TabsTrigger>
           </TabsList>
         </div>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
