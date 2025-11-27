@@ -309,18 +309,7 @@ export default function TicketsModule() {
                     </CardContent>
                   </Card>
                   
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
-                setActiveTab("service-requests");
-                setRequestTypeFilter('service_request');
-              }}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <span className="text-2xl font-bold">{stats?.serviceRequests?.fulfilled || 0}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Fulfilled Requests</p>
-                    </CardContent>
-                  </Card>
+                  
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -337,18 +326,7 @@ export default function TicketsModule() {
                     </CardContent>
                   </Card>
                   
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
-                setActiveTab("tickets");
-                setRequestTypeFilter('ticket');
-              }}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <Clock className="h-4 w-4 text-destructive" />
-                        <span className="text-2xl font-bold">{stats?.tickets?.slaBreached || 0}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">SLA Breached</p>
-                    </CardContent>
-                  </Card>
+                  
                   
                   <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
                 setActiveTab("all");
