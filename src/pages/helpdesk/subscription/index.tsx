@@ -103,7 +103,7 @@ const HelpdeskSubscriptionLayout = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <TabsList className="h-8">
               {tabs.map(tab => <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5 px-3 text-sm h-7">
-                  <tab.icon className="h-3.5 w-3.5" />
+                  
                   <span className="hidden sm:inline">{tab.label}</span>
                   {tab.count > 0}
                 </TabsTrigger>)}
