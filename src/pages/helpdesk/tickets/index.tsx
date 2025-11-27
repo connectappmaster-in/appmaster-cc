@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Ticket, AlertTriangle, Search, LayoutDashboard, AlertCircle, Clock, CheckCircle2, Package } from "lucide-react";
+import { Plus, Ticket, AlertTriangle, Search, AlertCircle, Clock, CheckCircle2, Package } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,23 +138,23 @@ export default function TicketsModule() {
           <div className="flex items-center gap-2 flex-wrap">
             <TabsList className="h-8">
               <TabsTrigger value="overview" className="gap-1.5 px-3 text-sm h-7">
-                <LayoutDashboard className="h-3.5 w-3.5" />
+                
                 Overview
               </TabsTrigger>
               <TabsTrigger value="all" className="gap-1.5 px-3 text-sm h-7" onClick={() => setRequestTypeFilter('all')}>
-                <Package className="h-3.5 w-3.5" />
+                
                 All Requests
               </TabsTrigger>
               <TabsTrigger value="tickets" className="gap-1.5 px-3 text-sm h-7" onClick={() => setRequestTypeFilter('ticket')}>
-                <Ticket className="h-3.5 w-3.5" />
+                
                 Tickets
               </TabsTrigger>
               <TabsTrigger value="service-requests" className="gap-1.5 px-3 text-sm h-7" onClick={() => setRequestTypeFilter('service_request')}>
-                <Package className="h-3.5 w-3.5" />
+                
                 Service Requests
               </TabsTrigger>
               <TabsTrigger value="problems" className="gap-1.5 px-3 text-sm h-7">
-                <AlertTriangle className="h-3.5 w-3.5" />
+                
                 Problems
                 {problems.length > 0}
               </TabsTrigger>
@@ -270,7 +270,10 @@ export default function TicketsModule() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div> : <>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setActiveTab("all"); setRequestTypeFilter('all'); }}>
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
+                setActiveTab("all");
+                setRequestTypeFilter('all');
+              }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <Package className="h-4 w-4 text-primary" />
@@ -280,7 +283,10 @@ export default function TicketsModule() {
                     </CardContent>
                   </Card>
                   
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setActiveTab("tickets"); setRequestTypeFilter('ticket'); }}>
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
+                setActiveTab("tickets");
+                setRequestTypeFilter('ticket');
+              }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <AlertCircle className="h-4 w-4 text-orange-600" />
@@ -290,7 +296,10 @@ export default function TicketsModule() {
                     </CardContent>
                   </Card>
                   
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setActiveTab("service-requests"); setRequestTypeFilter('service_request'); }}>
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
+                setActiveTab("service-requests");
+                setRequestTypeFilter('service_request');
+              }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <Clock className="h-4 w-4 text-blue-600" />
@@ -300,7 +309,10 @@ export default function TicketsModule() {
                     </CardContent>
                   </Card>
                   
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setActiveTab("service-requests"); setRequestTypeFilter('service_request'); }}>
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
+                setActiveTab("service-requests");
+                setRequestTypeFilter('service_request');
+              }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -312,7 +324,10 @@ export default function TicketsModule() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setActiveTab("tickets"); setRequestTypeFilter('ticket'); }}>
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
+                setActiveTab("tickets");
+                setRequestTypeFilter('ticket');
+              }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -322,7 +337,10 @@ export default function TicketsModule() {
                     </CardContent>
                   </Card>
                   
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setActiveTab("tickets"); setRequestTypeFilter('ticket'); }}>
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
+                setActiveTab("tickets");
+                setRequestTypeFilter('ticket');
+              }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <Clock className="h-4 w-4 text-destructive" />
@@ -332,7 +350,10 @@ export default function TicketsModule() {
                     </CardContent>
                   </Card>
                   
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setActiveTab("all"); setRequestTypeFilter('all'); }}>
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
+                setActiveTab("all");
+                setRequestTypeFilter('all');
+              }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <Ticket className="h-4 w-4 text-muted-foreground" />
