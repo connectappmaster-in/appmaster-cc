@@ -71,9 +71,7 @@ export function HelpdeskSidebar() {
           {navItems.map(item => {
           const active = isActive(item.url);
           const menuButton = <NavLink to={item.url} end={item.url === "/helpdesk"} className={`flex items-center h-9 rounded-lg relative transition-colors duration-200 font-medium text-sm ${active ? "text-primary bg-accent" : "text-foreground hover:text-primary hover:bg-accent/50"}`}>
-                <div className="w-9 h-9 flex items-center justify-center flex-shrink-0">
-                  
-                </div>
+                
                 <div className={`transition-all duration-300 overflow-hidden whitespace-nowrap flex items-center gap-2 ${collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
                   <span className="text-sm font-medium">{item.title}</span>
                 </div>
