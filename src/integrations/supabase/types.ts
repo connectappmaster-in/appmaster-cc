@@ -2693,18 +2693,25 @@ export type Database = {
       }
       helpdesk_tickets: {
         Row: {
+          additional_notes: string | null
           assignee_id: string | null
           attachments: Json | null
+          catalog_item_id: number | null
           category_id: number | null
           closed_at: string | null
           created_at: string | null
           created_by: string | null
           description: string
+          form_data: Json | null
+          fulfilled_at: string | null
           id: number
           is_deleted: boolean | null
           organisation_id: string | null
           priority: string
           queue_id: number | null
+          rejected_at: string | null
+          rejection_reason: string | null
+          request_type: Database["public"]["Enums"]["request_type"] | null
           requester_id: string | null
           resolution_comments: string | null
           resolved_at: string | null
@@ -2722,18 +2729,25 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          additional_notes?: string | null
           assignee_id?: string | null
           attachments?: Json | null
+          catalog_item_id?: number | null
           category_id?: number | null
           closed_at?: string | null
           created_at?: string | null
           created_by?: string | null
           description: string
+          form_data?: Json | null
+          fulfilled_at?: string | null
           id?: number
           is_deleted?: boolean | null
           organisation_id?: string | null
           priority?: string
           queue_id?: number | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          request_type?: Database["public"]["Enums"]["request_type"] | null
           requester_id?: string | null
           resolution_comments?: string | null
           resolved_at?: string | null
@@ -2751,18 +2765,25 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          additional_notes?: string | null
           assignee_id?: string | null
           attachments?: Json | null
+          catalog_item_id?: number | null
           category_id?: number | null
           closed_at?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string
+          form_data?: Json | null
+          fulfilled_at?: string | null
           id?: number
           is_deleted?: boolean | null
           organisation_id?: string | null
           priority?: string
           queue_id?: number | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          request_type?: Database["public"]["Enums"]["request_type"] | null
           requester_id?: string | null
           resolution_comments?: string | null
           resolved_at?: string | null
@@ -2799,6 +2820,13 @@ export type Database = {
             columns: ["assignee_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpdesk_tickets_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "srm_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -7657,6 +7685,14 @@ export type Database = {
         Args: { p_org_id: string; p_tenant_id: number }
         Returns: string
       }
+      generate_unified_request_number: {
+        Args: {
+          p_org_id: string
+          p_request_type: Database["public"]["Enums"]["request_type"]
+          p_tenant_id: number
+        }
+        Returns: string
+      }
       get_appmaster_admin_details: {
         Args: never
         Returns: {
@@ -7810,6 +7846,7 @@ export type Database = {
         | "system_alert"
         | "broadcast"
         | "general"
+      request_type: "ticket" | "service_request"
       super_admin_role:
         | "super_admin"
         | "saas_manager"
@@ -7960,6 +7997,7 @@ export const Constants = {
         "broadcast",
         "general",
       ],
+      request_type: ["ticket", "service_request"],
       super_admin_role: [
         "super_admin",
         "saas_manager",
