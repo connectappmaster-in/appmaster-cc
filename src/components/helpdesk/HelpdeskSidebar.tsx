@@ -20,7 +20,7 @@ const navItems = [{
   url: "/helpdesk/subscription",
   icon: CreditCard
 }, {
-  title: "System Updates",
+  title: "Updates",
   url: "/helpdesk/system-updates",
   icon: Bell
 }, {
