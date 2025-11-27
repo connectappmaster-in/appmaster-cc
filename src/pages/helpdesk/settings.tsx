@@ -9,13 +9,13 @@ import { Bell, Mail, Clock, Shield, Palette, Users } from "lucide-react";
 import { OrgUsersManager } from "@/components/OrgAdmin/OrgUsersManager";
 import { useRole } from "@/hooks/useRole";
 export default function SettingsModule() {
-  const {
-    isAdmin
-  } = useRole();
+  const { canManageUsers } = useRole();
+  const showUsers = canManageUsers();
+  
   return <div className="w-full h-full space-y-4">
-      <Tabs defaultValue={isAdmin() ? "users" : "general"} className="w-full">
-        <TabsList className={`grid w-full ${isAdmin() ? 'grid-cols-7' : 'grid-cols-6'}`}>
-          {isAdmin() && <TabsTrigger value="users">Users</TabsTrigger>}
+      <Tabs defaultValue={showUsers ? "users" : "general"} className="w-full">
+        <TabsList className={`grid w-full ${showUsers ? 'grid-cols-7' : 'grid-cols-6'}`}>
+          {showUsers && <TabsTrigger value="users">Users</TabsTrigger>}
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
@@ -24,7 +24,7 @@ export default function SettingsModule() {
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
 
-        {isAdmin() && <TabsContent value="users" className="space-y-3 mt-4">
+        {showUsers && <TabsContent value="users" className="space-y-3 mt-4">
             <Card>
               
               <CardContent className="p-4">
