@@ -7,15 +7,13 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Bell, Mail, Clock, Shield, Palette, Users } from "lucide-react";
 import { OrgUsersManager } from "@/components/OrgAdmin/OrgUsersManager";
-import { useRole } from "@/hooks/useRole";
+
 export default function SettingsModule() {
-  const { canManageUsers } = useRole();
-  const showUsers = canManageUsers();
-  
-  return <div className="w-full h-full space-y-4">
-      <Tabs defaultValue={showUsers ? "users" : "general"} className="w-full">
-        <TabsList className={`grid w-full ${showUsers ? 'grid-cols-7' : 'grid-cols-6'}`}>
-          {showUsers && <TabsTrigger value="users">Users</TabsTrigger>}
+  return (
+    <div className="w-full h-full space-y-4">
+      <Tabs defaultValue="users" className="w-full">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="users">User Management</TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
@@ -24,20 +22,24 @@ export default function SettingsModule() {
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
 
-        {showUsers && <TabsContent value="users" className="space-y-3 mt-4">
-            <Card>
-              
-              <CardContent className="p-4">
-                <OrgUsersManager />
-              </CardContent>
-            </Card>
-          </TabsContent>}
+        <TabsContent value="users" className="space-y-3 mt-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                <CardTitle>User Management</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <OrgUsersManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="general" className="space-y-3 mt-4">
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                
                 <CardTitle>Organization Details</CardTitle>
               </div>
             </CardHeader>
@@ -76,7 +78,9 @@ export default function SettingsModule() {
               <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
                   <Label>Ticket Created</Label>
-                  <p className="text-sm text-muted-foreground">Get notified when a new ticket is created</p>
+                  <p className="text-sm text-muted-foreground">
+                    Get notified when a new ticket is created
+                  </p>
                 </div>
                 <Switch />
               </div>
@@ -84,7 +88,9 @@ export default function SettingsModule() {
               <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
                   <Label>Ticket Assigned</Label>
-                  <p className="text-sm text-muted-foreground">Get notified when a ticket is assigned to you</p>
+                  <p className="text-sm text-muted-foreground">
+                    Get notified when a ticket is assigned to you
+                  </p>
                 </div>
                 <Switch defaultChecked />
               </div>
@@ -120,7 +126,10 @@ export default function SettingsModule() {
               </div>
             </CardHeader>
             <CardContent className="p-4">
-              <Button><Clock className="h-4 w-4 mr-2" />Add New SLA Policy</Button>
+              <Button>
+                <Clock className="h-4 w-4 mr-2" />
+                Add New SLA Policy
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -157,5 +166,6 @@ export default function SettingsModule() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 }
