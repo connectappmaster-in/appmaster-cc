@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LayoutDashboard, Ticket, Package, BookOpen, CreditCard, Bell, Activity, BarChart3, FileText, Settings, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, Ticket, Package, CreditCard, Bell, Activity, BarChart3, FileText, Settings, ChevronLeft } from "lucide-react";
 import appmasterLogo from "@/assets/appmaster-logo.png";
 import { NavLink, useLocation } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -10,7 +10,6 @@ const navItems = [
   { title: "Assets", url: "/helpdesk/assets", icon: Package },
   { title: "Subscription", url: "/helpdesk/subscription", icon: CreditCard },
   { title: "System Updates", url: "/helpdesk/system-updates", icon: Bell },
-  { title: "Knowledge Base", url: "/helpdesk/kb", icon: BookOpen },
   { title: "Monitoring", url: "/helpdesk/monitoring", icon: Activity },
   { title: "Reports", url: "/helpdesk/reports", icon: BarChart3 },
   { title: "Audit", url: "/helpdesk/audit", icon: FileText },
