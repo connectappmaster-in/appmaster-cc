@@ -91,10 +91,10 @@ export function CreateTicketForm({ onSearchChange }: CreateTicketFormProps) {
       // Use tenant_id if available, otherwise default to 1 for org users
       const tenantId = currentUser.profileTenantId || currentUser.tenant_id || 1;
 
-      // Generate ticket number
+      // Generate ticket number per-tenant (ignore organisation to avoid collisions across orgs)
       const { data: ticketNumber } = await supabase.rpc("generate_helpdesk_ticket_number", {
         p_tenant_id: tenantId,
-        p_org_id: currentUser.organisation_id,
+        p_org_id: null as any,
       });
 
       // Insert ticket
