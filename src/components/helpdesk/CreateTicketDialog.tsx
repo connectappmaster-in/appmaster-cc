@@ -34,6 +34,9 @@ import { Loader2, Plus } from "lucide-react";
 import { CreateCategoryDialog } from "./CreateCategoryDialog";
 
 const ticketSchema = z.object({
+  request_type: z.enum(["ticket", "service_request"], {
+    required_error: "Please select a request type",
+  }),
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   priority: z.enum(["low", "medium", "high", "urgent"]),
@@ -92,6 +95,7 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
   const form = useForm<z.infer<typeof ticketSchema>>({
     resolver: zodResolver(ticketSchema),
     defaultValues: {
+      request_type: "ticket",
       title: "",
       description: "",
       priority: "medium",
@@ -130,6 +134,7 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
         organisation_id: currentUser.orgId,
         tenant_id: currentUser.tenantId,
         status: "open",
+        request_type: values.request_type,
       };
 
       const { data, error } = await supabase
@@ -142,14 +147,15 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
       return data;
     },
     onSuccess: () => {
-      toast.success("Ticket created successfully");
+      toast.success("Request created successfully");
       queryClient.invalidateQueries({ queryKey: ["helpdesk-tickets"] });
+      queryClient.invalidateQueries({ queryKey: ["unified-requests"] });
       queryClient.invalidateQueries({ queryKey: ["helpdesk-dashboard-stats"] });
       form.reset();
       onOpenChange(false);
     },
     onError: (error: Error) => {
-      toast.error("Failed to create ticket: " + error.message);
+      toast.error("Failed to create request: " + error.message);
     },
   });
 
@@ -161,14 +167,36 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create New Ticket</DialogTitle>
+          <DialogTitle>Create New Request</DialogTitle>
           <DialogDescription>
-            Submit a support request or report an issue. We'll get back to you as soon as possible.
+            Submit a ticket or service request. We'll get back to you as soon as possible.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="request_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Request Type *</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select request type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="ticket">Ticket</SelectItem>
+                      <SelectItem value="service_request">Service Request</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="title"
@@ -277,7 +305,7 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
               </Button>
               <Button type="submit" disabled={createTicket.isPending}>
                 {createTicket.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Ticket
+                Create Request
               </Button>
             </div>
           </form>
