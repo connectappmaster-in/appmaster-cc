@@ -24,17 +24,19 @@ export function AssignProblemDialog({ open, onOpenChange, problem }: AssignProbl
   const { data: users } = useQuery({
     queryKey: ["org-users"],
     queryFn: async () => {
+      if (!user?.id) return [];
+
       const { data: userData } = await supabase
         .from("users")
         .select("organisation_id")
-        .eq("id", user?.id)
+        .eq("auth_user_id", user.id)
         .single();
 
       if (!userData?.organisation_id) return [];
 
       const { data, error } = await supabase
         .from("users")
-        .select("id, name, email")
+        .select("id, auth_user_id, name, email")
         .eq("organisation_id", userData.organisation_id)
         .order("name");
 
@@ -93,9 +95,9 @@ export function AssignProblemDialog({ open, onOpenChange, problem }: AssignProbl
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="unassigned">Unassigned</SelectItem>
-                {users?.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.name} ({user.email})
+                {users?.map((u: any) => (
+                  <SelectItem key={u.auth_user_id} value={u.auth_user_id}>
+                    {u.name} ({u.email})
                   </SelectItem>
                 ))}
               </SelectContent>
