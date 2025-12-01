@@ -103,7 +103,6 @@ export function CreateTicketForm({ onSearchChange }: CreateTicketFormProps) {
           category_id: parseInt(data.category_id),
           status: "open",
           requester_id: currentUser.id,
-          created_by: currentUser.id,
           tenant_id: currentUser.profileTenantId || currentUser.tenant_id,
           organisation_id: currentUser.organisation_id,
         })
