@@ -80,25 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          setTimeout(() => {
-            fetchUserMetadata(session.user.id);
-          }, 0);
-        } else {
-          setAccountType(null);
-          setUserRole(null);
-          setOrgRole(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
+    // Get initial session first
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -109,6 +91,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       setLoading(false);
     });
+
+    // Then set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state change:', event);
+        
+        // Only update state for specific events to prevent unnecessary resets
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            setTimeout(() => {
+              fetchUserMetadata(session.user.id);
+            }, 0);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
+          setAccountType(null);
+          setUserRole(null);
+          setUserType(null);
+          setAppmasterRole(null);
+          setOrgRole(null);
+        }
+        
+        setLoading(false);
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, []);
