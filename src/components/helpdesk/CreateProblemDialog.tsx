@@ -108,14 +108,16 @@ export const CreateProblemDialog = ({
 
   const createProblem = useMutation({
     mutationFn: async (data: ProblemFormData) => {
-      if (!userData?.userId || !userData?.tenantId) {
-        throw new Error("User data not available");
+      if (!userData?.organisationId) {
+        throw new Error("User organisation not configured");
       }
+      
+      const tenantId = userData.tenantId || 1;
 
       const { data: problemNumber } = await supabase.rpc(
         "generate_problem_number",
         {
-          p_tenant_id: userData.tenantId,
+          p_tenant_id: tenantId,
           p_org_id: userData.organisationId,
         }
       );
@@ -131,7 +133,7 @@ export const CreateProblemDialog = ({
         status: "open",
         created_by: userData.authUserId,
         organisation_id: userData.organisationId,
-        tenant_id: userData.tenantId,
+        tenant_id: tenantId,
       });
 
       if (error) throw error;
