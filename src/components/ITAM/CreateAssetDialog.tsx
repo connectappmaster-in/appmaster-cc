@@ -200,14 +200,20 @@ export const CreateAssetDialog = ({
         data: profileData
       } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).maybeSingle();
 
-      // Validate asset_id uniqueness
-      const { data: existingAsset } = await supabase
+      // Validate both asset_id and asset_tag uniqueness
+      const { data: existingAssetById } = await supabase
         .from("itam_assets")
         .select("id")
         .eq("asset_id", values.asset_id)
         .maybeSingle();
 
-      if (existingAsset) {
+      const { data: existingAssetByTag } = await supabase
+        .from("itam_assets")
+        .select("id")
+        .eq("asset_tag", values.asset_id)
+        .maybeSingle();
+
+      if (existingAssetById || existingAssetByTag) {
         throw new Error("Asset ID already exists. Please use a different ID.");
       }
 
