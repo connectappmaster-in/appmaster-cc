@@ -122,15 +122,14 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
         throw new Error("User information not available. Please try logging in again.");
       }
 
-      if (!currentUser.tenantId) {
-        throw new Error("Tenant information is not configured for your profile. Please contact your administrator.");
-      }
+      // Use tenant_id if available, otherwise default to 1 for org users
+      const tenantId = currentUser.tenantId || 1;
 
       // Generate ticket number
       const { data: ticketNumber, error: rpcError } = await supabase.rpc(
         "generate_helpdesk_ticket_number",
         {
-          p_tenant_id: currentUser.tenantId,
+          p_tenant_id: tenantId,
           p_org_id: currentUser.orgId,
         }
       );
@@ -147,7 +146,7 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
         ticket_number: ticketNumber,
         requester_id: currentUser.userId,
         organisation_id: currentUser.orgId,
-        tenant_id: currentUser.tenantId,
+        tenant_id: tenantId,
         status: "open",
         request_type: values.request_type,
       };

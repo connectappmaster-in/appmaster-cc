@@ -88,10 +88,8 @@ export function CreateTicketForm({ onSearchChange }: CreateTicketFormProps) {
     mutationFn: async (data: TicketFormData) => {
       if (!currentUser) throw new Error("User not found");
 
-      const tenantId = currentUser.profileTenantId || currentUser.tenant_id;
-      if (!tenantId) {
-        throw new Error("Tenant information is not configured for your profile. Please contact your administrator.");
-      }
+      // Use tenant_id if available, otherwise default to 1 for org users
+      const tenantId = currentUser.profileTenantId || currentUser.tenant_id || 1;
 
       // Generate ticket number
       const { data: ticketNumber } = await supabase.rpc("generate_helpdesk_ticket_number", {
