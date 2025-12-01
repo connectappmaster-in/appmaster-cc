@@ -30,7 +30,6 @@ export const useUnifiedRequests = (requestType: RequestType = 'all') => {
         .select(`
           *,
           category:helpdesk_categories(name),
-          catalog_item:srm_catalog(name, category),
           assignee:users!helpdesk_tickets_assignee_id_fkey(name, email),
           requester:users!helpdesk_tickets_requester_id_fkey(name, email),
           created_by_user:users!helpdesk_tickets_created_by_fkey(name, email)
