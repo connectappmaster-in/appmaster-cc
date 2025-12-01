@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedRequests, useUnifiedRequestsStats, type RequestType } from "@/hooks/useUnifiedRequests";
 import { CreateProblemDialog } from "@/components/helpdesk/CreateProblemDialog";
+import { CreateTicketDialog } from "@/components/helpdesk/CreateTicketDialog";
 import { TicketFilters } from "@/components/helpdesk/TicketFilters";
 import { BulkActionsButton } from "@/components/helpdesk/BulkActionsButton";
 import { BulkActionsProblemButton } from "@/components/helpdesk/BulkActionsProblemButton";
@@ -34,6 +35,7 @@ export default function TicketsModule() {
     }
   }, [location.pathname]);
   const [createProblemOpen, setCreateProblemOpen] = useState(false);
+  const [createTicketOpen, setCreateTicketOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [editTicket, setEditTicket] = useState<any>(null);
@@ -49,6 +51,7 @@ export default function TicketsModule() {
 
   // Client-side filtering
   const requests = (allRequests || []).filter((request: any) => {
+    if (filters.requestType && request.request_type !== filters.requestType) return false;
     if (filters.status && request.status !== filters.status) return false;
     if (filters.priority && request.priority !== filters.priority) return false;
     if (filters.category && request.category_id?.toString() !== filters.category) return false;
@@ -63,10 +66,6 @@ export default function TicketsModule() {
     if (filters.dateTo && new Date(request.created_at) > new Date(filters.dateTo)) return false;
     return true;
   });
-
-  // Separate tickets and service requests for display
-  const tickets = requests.filter((r: any) => r.request_type === 'ticket');
-  const serviceRequests = requests.filter((r: any) => r.request_type === 'service_request');
   const {
     data: allProblems
   } = useQuery({
@@ -118,7 +117,7 @@ export default function TicketsModule() {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
   const handleSelectAll = (checked: boolean) => {
-    setSelectedIds(checked ? tickets.map((t: any) => t.id) : []);
+    setSelectedIds(checked ? requests.map((t: any) => t.id) : []);
   };
   const handleSelectProblem = (id: number) => {
     setSelectedProblemIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -138,32 +137,20 @@ export default function TicketsModule() {
           <div className="flex items-center gap-2 flex-wrap">
             <TabsList className="h-8">
               <TabsTrigger value="overview" className="gap-1.5 px-3 text-sm h-7">
-                
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="all" className="gap-1.5 px-3 text-sm h-7" onClick={() => setRequestTypeFilter('all')}>
-                
-                All Requests
-              </TabsTrigger>
-              <TabsTrigger value="tickets" className="gap-1.5 px-3 text-sm h-7" onClick={() => setRequestTypeFilter('ticket')}>
-                
+              <TabsTrigger value="tickets" className="gap-1.5 px-3 text-sm h-7" onClick={() => setRequestTypeFilter('all')}>
                 Tickets
               </TabsTrigger>
-              <TabsTrigger value="service-requests" className="gap-1.5 px-3 text-sm h-7" onClick={() => setRequestTypeFilter('service_request')}>
-                
-                Service Requests
-              </TabsTrigger>
               <TabsTrigger value="problems" className="gap-1.5 px-3 text-sm h-7">
-                
                 Problems
-                {problems.length > 0}
               </TabsTrigger>
             </TabsList>
 
-            {(activeTab === 'tickets' || activeTab === 'all' || activeTab === 'service-requests') && <>
+            {activeTab === 'tickets' && <>
                 <div className="relative w-[250px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder={`Search ${activeTab === 'service-requests' ? 'service requests' : activeTab === 'tickets' ? 'tickets' : 'all requests'}...`} value={filters.search || ''} onChange={e => setFilters({
+                  <Input placeholder="Search tickets and requests..." value={filters.search || ''} onChange={e => setFilters({
                 ...filters,
                 search: e.target.value
               })} className="pl-9 h-8" />
@@ -172,6 +159,20 @@ export default function TicketsModule() {
                 <div className="flex items-center gap-2 ml-auto">
                   <BulkActionsButton selectedIds={selectedIds} onClearSelection={() => setSelectedIds([])} />
                   
+                  <Select value={filters.requestType || 'all'} onValueChange={value => setFilters({
+                ...filters,
+                requestType: value === 'all' ? null : value
+              })}>
+                    <SelectTrigger className="w-[140px] h-8">
+                      <SelectValue placeholder="Request Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="ticket">Tickets</SelectItem>
+                      <SelectItem value="service_request">Service Requests</SelectItem>
+                    </SelectContent>
+                  </Select>
+
                   <Select value={filters.status || 'all'} onValueChange={value => setFilters({
                 ...filters,
                 status: value === 'all' ? null : value
@@ -205,9 +206,9 @@ export default function TicketsModule() {
                     </SelectContent>
                   </Select>
 
-                  <Button size="sm" onClick={() => navigate(activeTab === 'service-requests' ? '/helpdesk/service-requests/request-form' : '/helpdesk/new')} className="gap-1.5 h-8">
+                  <Button size="sm" onClick={() => setCreateTicketOpen(true)} className="gap-1.5 h-8">
                     <Plus className="h-3.5 w-3.5" />
-                    <span className="text-sm">{activeTab === 'service-requests' ? 'New Service Request' : 'New Ticket'}</span>
+                    <span className="text-sm">New Request</span>
                   </Button>
                 </div>
               </>}
@@ -271,7 +272,7 @@ export default function TicketsModule() {
               </div> : <>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                   <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
-                setActiveTab("all");
+                setActiveTab("tickets");
                 setRequestTypeFilter('all');
               }}>
                     <CardContent className="p-4">
@@ -286,6 +287,7 @@ export default function TicketsModule() {
                   <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
                 setActiveTab("tickets");
                 setRequestTypeFilter('ticket');
+                setFilters({ requestType: 'ticket' });
               }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
@@ -297,15 +299,16 @@ export default function TicketsModule() {
                   </Card>
                   
                   <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
-                setActiveTab("service-requests");
+                setActiveTab("tickets");
                 setRequestTypeFilter('service_request');
+                setFilters({ requestType: 'service_request' });
               }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <Clock className="h-4 w-4 text-blue-600" />
                         <span className="text-2xl font-bold">{stats?.serviceRequests?.pending || 0}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">Pending Requests</p>
+                      <p className="text-xs text-muted-foreground">Pending Service Requests</p>
                     </CardContent>
                   </Card>
                   
@@ -316,6 +319,7 @@ export default function TicketsModule() {
                   <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
                 setActiveTab("tickets");
                 setRequestTypeFilter('ticket');
+                setFilters({ requestType: 'ticket' });
               }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
@@ -329,7 +333,7 @@ export default function TicketsModule() {
                   
                   
                   <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
-                setActiveTab("all");
+                setActiveTab("tickets");
                 setRequestTypeFilter('all');
               }}>
                     <CardContent className="p-4">
@@ -344,59 +348,25 @@ export default function TicketsModule() {
               </>}
           </TabsContent>
 
-          <TabsContent value="all" className="space-y-2 mt-2">
-            {isLoading ? <div className="flex items-center justify-center py-12">
-                <div className="text-center space-y-2">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                  <p className="text-sm text-muted-foreground">Loading requests...</p>
-                </div>
-              </div> : requests.length === 0 ? <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg">
-                <Ticket className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-lg font-medium mb-2">No requests found</p>
-                <p className="text-sm text-muted-foreground mb-4">Create your first ticket or service request to get started</p>
-                <Button onClick={() => navigate('/helpdesk/new')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Request
-                </Button>
-              </div> : <TicketTableView tickets={requests} selectedIds={selectedIds} onSelectTicket={handleSelectTicket} onSelectAll={handleSelectAll} onEditTicket={ticket => setEditTicket(ticket)} onAssignTicket={ticket => setAssignTicket(ticket)} />}
-          </TabsContent>
-
           <TabsContent value="tickets" className="space-y-2 mt-2">
             {isLoading ? <div className="flex items-center justify-center py-12">
                 <div className="text-center space-y-2">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                  <p className="text-sm text-muted-foreground">Loading tickets...</p>
+                  <p className="text-sm text-muted-foreground">Loading...</p>
                 </div>
-              </div> : tickets.length === 0 ? <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg">
+              </div> : requests.length === 0 ? <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg">
                 <div className="rounded-full bg-muted p-4 mb-3">
                   <Ticket className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-base font-semibold mb-1">No tickets found</h3>
+                <h3 className="text-base font-semibold mb-1">No requests found</h3>
                 <p className="text-xs text-muted-foreground mb-4 text-center max-w-md">
-                  {Object.keys(filters).length > 0 ? "Try adjusting your filters to see more tickets" : "Get started by creating your first support ticket"}
+                  {Object.keys(filters).length > 0 ? "Try adjusting your filters to see more requests" : "Get started by creating your first ticket or service request"}
                 </p>
-                {Object.keys(filters).length === 0 && <Button onClick={() => navigate('/helpdesk/new')} size="sm" className="gap-1.5 h-8">
+                {Object.keys(filters).length === 0 && <Button onClick={() => setCreateTicketOpen(true)} size="sm" className="gap-1.5 h-8">
                     <Plus className="h-3.5 w-3.5" />
-                    <span className="text-sm">Create First Ticket</span>
+                    <span className="text-sm">Create First Request</span>
                   </Button>}
-              </div> : <TicketTableView tickets={tickets} selectedIds={selectedIds} onSelectTicket={handleSelectTicket} onSelectAll={handleSelectAll} onEditTicket={setEditTicket} onAssignTicket={setAssignTicket} />}
-          </TabsContent>
-
-          <TabsContent value="service-requests" className="space-y-2 mt-2">
-            {isLoading ? <div className="flex items-center justify-center py-12">
-                <div className="text-center space-y-2">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                  <p className="text-sm text-muted-foreground">Loading service requests...</p>
-                </div>
-              </div> : serviceRequests.length === 0 ? <div className="flex flex-col items-center justify-center py-12 border border-dashed rounded-lg">
-                <Package className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-lg font-medium mb-2">No service requests found</p>
-                <p className="text-sm text-muted-foreground mb-4">Create your first service request</p>
-                <Button onClick={() => navigate('/helpdesk/service-requests/request-form')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Service Request
-                </Button>
-              </div> : <TicketTableView tickets={serviceRequests} selectedIds={selectedIds} onSelectTicket={handleSelectTicket} onSelectAll={handleSelectAll} onEditTicket={setEditTicket} onAssignTicket={setAssignTicket} />}
+              </div> : <TicketTableView tickets={requests} selectedIds={selectedIds} onSelectTicket={handleSelectTicket} onSelectAll={handleSelectAll} onEditTicket={setEditTicket} onAssignTicket={setAssignTicket} />}
           </TabsContent>
 
           <TabsContent value="problems" className="space-y-2">
@@ -416,6 +386,7 @@ export default function TicketsModule() {
           </TabsContent>
         </Tabs>
 
+        <CreateTicketDialog open={createTicketOpen} onOpenChange={setCreateTicketOpen} />
         <CreateProblemDialog open={createProblemOpen} onOpenChange={setCreateProblemOpen} />
         {editTicket && <EditTicketDialog open={!!editTicket} onOpenChange={open => !open && setEditTicket(null)} ticket={editTicket} />}
         {assignTicket && <AssignTicketDialog open={!!assignTicket} onOpenChange={open => !open && setAssignTicket(null)} ticket={assignTicket} />}
