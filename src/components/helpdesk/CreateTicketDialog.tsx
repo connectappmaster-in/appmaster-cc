@@ -88,10 +88,12 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
         .eq("id", user.id)
         .maybeSingle();
 
+      const { data: orgFromFunction } = await supabase.rpc("get_user_org");
+
       return {
         userId: userData.id,
-        orgId: userData.organisation_id,
-        tenantId: profileData?.tenant_id || 1,
+        orgId: orgFromFunction || userData.organisation_id,
+        tenantId: profileData?.tenant_id,
       };
     },
   });
@@ -118,6 +120,10 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
     mutationFn: async (values: z.infer<typeof ticketSchema>) => {
       if (!currentUser || !currentUser.userId) {
         throw new Error("User information not available. Please try logging in again.");
+      }
+
+      if (!currentUser.tenantId) {
+        throw new Error("Tenant information is not configured for your profile. Please contact your administrator.");
       }
 
       // Generate ticket number
