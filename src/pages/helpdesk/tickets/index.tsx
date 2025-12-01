@@ -283,85 +283,291 @@ export default function TicketsModule() {
           </div>
 
           <TabsContent value="overview" className="space-y-4 mt-2">
-            {statsLoading ? <div className="flex items-center justify-center py-12">
+            {/* Quick Action Buttons */}
+            <div className="flex items-center gap-3">
+              <Button onClick={() => setCreateTicketOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                New Ticket
+              </Button>
+              <Button onClick={() => setCreateProblemOpen(true)} variant="outline" className="gap-2">
+                <Plus className="h-4 w-4" />
+                New Problem
+              </Button>
+            </div>
+
+            {statsLoading ? (
+              <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div> : <>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
-                setActiveTab("tickets");
-                setRequestTypeFilter('all');
-              }}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <Package className="h-4 w-4 text-primary" />
-                        <span className="text-2xl font-bold">{stats?.total || 0}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Total Requests</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
-                setActiveTab("tickets");
-                setRequestTypeFilter('ticket');
-                setFilters({ requestType: 'ticket' });
-              }}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <AlertCircle className="h-4 w-4 text-orange-600" />
-                        <span className="text-2xl font-bold">{stats?.tickets?.open || 0}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Open Tickets</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
-                setActiveTab("tickets");
-                setRequestTypeFilter('service_request');
-                setFilters({ requestType: 'service_request' });
-              }}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <Clock className="h-4 w-4 text-blue-600" />
-                        <span className="text-2xl font-bold">{stats?.serviceRequests?.pending || 0}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Pending Service Requests</p>
-                    </CardContent>
-                  </Card>
-                  
-                  
+              </div>
+            ) : (
+              <>
+                {/* Tickets Section */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Tickets Overview</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("tickets");
+                        setFilters({ requestType: 'ticket' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Ticket className="h-4 w-4 text-primary" />
+                        </div>
+                        <p className="text-2xl font-bold">{stats?.tickets?.total || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Total Tickets</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("tickets");
+                        setFilters({ requestType: 'ticket', status: 'open' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <AlertCircle className="h-4 w-4 text-orange-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{stats?.tickets?.open || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Open</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("tickets");
+                        setFilters({ requestType: 'ticket', status: 'in_progress' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Clock className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{stats?.tickets?.inProgress || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">In Progress</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("tickets");
+                        setFilters({ requestType: 'ticket', status: 'resolved' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{stats?.tickets?.resolved || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Resolved</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("tickets");
+                        setFilters({ requestType: 'ticket', priority: 'urgent' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{stats?.tickets?.urgent || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Urgent</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("tickets");
+                        setFilters({ requestType: 'ticket' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Ticket className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <p className="text-2xl font-bold">{stats?.recentTickets || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Last 7 Days</p>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
-                setActiveTab("tickets");
-                setRequestTypeFilter('ticket');
-                setFilters({ requestType: 'ticket' });
-              }}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
-                        <span className="text-2xl font-bold">{stats?.tickets?.urgent || 0}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Urgent Tickets</p>
-                    </CardContent>
-                  </Card>
-                  
-                  
-                  
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
-                setActiveTab("tickets");
-                setRequestTypeFilter('all');
-              }}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <Ticket className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-2xl font-bold">{stats?.recentTickets || 0}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Last 7 Days</p>
-                    </CardContent>
-                  </Card>
+                {/* Service Requests Section */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Service Requests</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("tickets");
+                        setFilters({ requestType: 'service_request' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Package className="h-4 w-4 text-primary" />
+                        </div>
+                        <p className="text-2xl font-bold">{stats?.serviceRequests?.total || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Total Requests</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("tickets");
+                        setFilters({ requestType: 'service_request', status: 'open' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Clock className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{stats?.serviceRequests?.pending || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Pending</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("tickets");
+                        setFilters({ requestType: 'service_request', status: 'in_progress' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Clock className="h-4 w-4 text-orange-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{stats?.serviceRequests?.inProgress || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">In Progress</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("tickets");
+                        setFilters({ requestType: 'service_request', status: 'fulfilled' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{stats?.serviceRequests?.fulfilled || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Fulfilled</p>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
-              </>}
+
+                {/* Problems Section */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Problems</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("problems");
+                        setProblemFilters({});
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <AlertTriangle className="h-4 w-4 text-primary" />
+                        </div>
+                        <p className="text-2xl font-bold">{problems?.length || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Total Problems</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("problems");
+                        setProblemFilters({ status: 'open' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <AlertCircle className="h-4 w-4 text-orange-500" />
+                        </div>
+                        <p className="text-2xl font-bold">
+                          {problems?.filter((p: any) => p.status === 'open').length || 0}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Open</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("problems");
+                        setProblemFilters({ status: 'in_progress' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Clock className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <p className="text-2xl font-bold">
+                          {problems?.filter((p: any) => p.status === 'in_progress').length || 0}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">In Progress</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("problems");
+                        setProblemFilters({ status: 'resolved' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        </div>
+                        <p className="text-2xl font-bold">
+                          {problems?.filter((p: any) => p.status === 'resolved').length || 0}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Resolved</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card 
+                      className="cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all" 
+                      onClick={() => {
+                        setActiveTab("problems");
+                        setProblemFilters({ priority: 'urgent' });
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                        </div>
+                        <p className="text-2xl font-bold">
+                          {problems?.filter((p: any) => p.priority === 'urgent').length || 0}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Urgent</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </>
+            )}
           </TabsContent>
 
           <TabsContent value="tickets" className="space-y-2 mt-2">
