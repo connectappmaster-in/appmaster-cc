@@ -153,7 +153,10 @@ export const CreateProblemDialog = ({
 
       if (numberError) throw numberError;
 
-      const createdBy = userData.userId ?? userData.authUserId;
+      // Ensure we have a valid user ID from the users table
+      if (!userData.userId) {
+        throw new Error("User record not found. Please contact administrator.");
+      }
 
       const { data: problemRow, error } = await supabase
         .from("helpdesk_problems")
@@ -166,7 +169,7 @@ export const CreateProblemDialog = ({
           root_cause: data.root_cause || null,
           workaround: data.workaround || null,
           status: "open",
-          created_by: createdBy,
+          created_by: userData.userId,
           organisation_id: userData.organisationId,
           tenant_id: tenantId,
         })
