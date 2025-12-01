@@ -19,7 +19,7 @@ export function AssignProblemDialog({ open, onOpenChange, problem }: AssignProbl
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [assigneeId, setAssigneeId] = useState(problem?.assigned_to || "");
+  const [assigneeId, setAssigneeId] = useState(problem?.assigned_to ?? "unassigned");
 
   const { data: users } = useQuery({
     queryKey: ["org-users"],
@@ -52,7 +52,7 @@ export function AssignProblemDialog({ open, onOpenChange, problem }: AssignProbl
       const { error } = await supabase
         .from("helpdesk_problems")
         .update({
-          assigned_to: assigneeId || null,
+          assigned_to: assigneeId === "unassigned" ? null : assigneeId,
           updated_at: new Date().toISOString(),
         })
         .eq("id", problem.id);
@@ -92,7 +92,7 @@ export function AssignProblemDialog({ open, onOpenChange, problem }: AssignProbl
                 <SelectValue placeholder="Select a user" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Unassigned</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
                 {users?.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.name} ({user.email})
