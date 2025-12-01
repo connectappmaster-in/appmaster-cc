@@ -72,11 +72,15 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data: userData } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from("users")
         .select("id, organisation_id")
         .eq("auth_user_id", user.id)
         .single();
+
+      if (userError || !userData) {
+        throw new Error("User not found in database");
+      }
 
       const { data: profileData } = await supabase
         .from("profiles")
@@ -85,8 +89,8 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
         .maybeSingle();
 
       return {
-        userId: userData?.id,
-        orgId: userData?.organisation_id,
+        userId: userData.id,
+        orgId: userData.organisation_id,
         tenantId: profileData?.tenant_id || 1,
       };
     },
@@ -112,16 +116,22 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
 
   const createTicket = useMutation({
     mutationFn: async (values: z.infer<typeof ticketSchema>) => {
-      if (!currentUser) throw new Error("User not found");
+      if (!currentUser || !currentUser.userId) {
+        throw new Error("User information not available. Please try logging in again.");
+      }
 
       // Generate ticket number
-      const { data: ticketNumber } = await supabase.rpc(
+      const { data: ticketNumber, error: rpcError } = await supabase.rpc(
         "generate_helpdesk_ticket_number",
         {
           p_tenant_id: currentUser.tenantId,
           p_org_id: currentUser.orgId,
         }
       );
+
+      if (rpcError) {
+        throw new Error("Failed to generate ticket number: " + rpcError.message);
+      }
 
       const ticketData = {
         title: values.title,
