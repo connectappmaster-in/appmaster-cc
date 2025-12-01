@@ -140,7 +140,6 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
         category_id: values.category_id ? parseInt(values.category_id) : null,
         ticket_number: ticketNumber,
         requester_id: currentUser.userId,
-        created_by: currentUser.userId,
         organisation_id: currentUser.orgId,
         tenant_id: currentUser.tenantId,
         status: "open",
