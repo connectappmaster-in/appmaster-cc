@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -46,6 +46,34 @@ export const CreateCategoryDialog = ({
   const { user } = useAuth();
   const { organisation } = useOrganisation();
 
+  // Get current user's tenant_id
+  const { data: userProfile } = useQuery({
+    queryKey: ["user-profile-tenant", user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("tenant_id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const { data: userData } = await supabase
+        .from("users")
+        .select("organisation_id")
+        .eq("auth_user_id", user.id)
+        .single();
+
+      const { data: orgFromFunction } = await supabase.rpc("get_user_org");
+
+      return {
+        tenant_id: profileData?.tenant_id,
+        organisation_id: orgFromFunction || userData?.organisation_id,
+      };
+    },
+    enabled: !!user,
+  });
+
   const form = useForm<z.infer<typeof categorySchema>>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
@@ -72,17 +100,34 @@ export const CreateCategoryDialog = ({
         if (error) throw error;
         return data;
       } else {
+        // Ensure we have tenant_id
+        if (!userProfile?.tenant_id) {
+          throw new Error("Tenant information is not configured. Please contact your administrator.");
+        }
+
+        // Check if category with same name already exists for this tenant
+        const { data: existing } = await supabase
+          .from("helpdesk_categories")
+          .select("id")
+          .eq("name", values.name)
+          .eq("tenant_id", userProfile.tenant_id)
+          .maybeSingle();
+
+        if (existing) {
+          throw new Error(`A category named "${values.name}" already exists. Please use a different name.`);
+        }
+
         // Create new category
         const categoryData: any = {
           name: values.name,
           description: values.description || null,
           is_active: true,
-          tenant_id: 1, // Default tenant
+          tenant_id: userProfile.tenant_id,
         };
 
         // Add organisation_id if available
-        if (organisation?.id) {
-          categoryData.organisation_id = organisation.id;
+        if (userProfile.organisation_id) {
+          categoryData.organisation_id = userProfile.organisation_id;
         }
 
         const { data, error } = await supabase
