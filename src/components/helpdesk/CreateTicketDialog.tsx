@@ -125,12 +125,12 @@ export const CreateTicketDialog = ({ open, onOpenChange }: CreateTicketDialogPro
       // Use tenant_id if available, otherwise default to 1 for org users
       const tenantId = currentUser.tenantId || 1;
 
-      // Generate ticket number
+      // Generate ticket number per-tenant (ignore organisation to avoid collisions across orgs)
       const { data: ticketNumber, error: rpcError } = await supabase.rpc(
         "generate_helpdesk_ticket_number",
         {
           p_tenant_id: tenantId,
-          p_org_id: currentUser.orgId,
+          p_org_id: null as any,
         }
       );
 
