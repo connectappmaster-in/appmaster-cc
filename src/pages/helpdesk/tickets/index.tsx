@@ -82,22 +82,38 @@ export default function TicketsModule() {
       });
       if (error) throw error;
 
-      // Fetch created_by users separately
+      // Fetch created_by and assigned_to users separately using auth_user_id
       if (data && data.length > 0) {
-        const userIds = [...new Set(data.map(p => p.created_by).filter(Boolean))];
-        if (userIds.length > 0) {
-          const {
-            data: users
-          } = await supabase.from('users').select('id, name, email').in('id', userIds);
+        const userAuthIds = [...new Set(
+          data
+            .flatMap((p: any) => [p.created_by, p.assigned_to])
+            .filter(Boolean)
+        )];
+
+        if (userAuthIds.length > 0) {
+          const { data: users } = await supabase
+            .from('users')
+            .select('id, auth_user_id, name, email')
+            .in('auth_user_id', userAuthIds as string[]);
+
           if (users) {
-            const userMap = Object.fromEntries(users.map(u => [u.id, u]));
-            return data.map(problem => ({
+            const userMap: Record<string, any> = Object.fromEntries(
+              users.map((u: any) => [u.auth_user_id, u])
+            );
+
+            return data.map((problem: any) => ({
               ...problem,
-              created_by_user: problem.created_by ? userMap[problem.created_by] : null
+              created_by_user: problem.created_by
+                ? userMap[problem.created_by] || null
+                : null,
+              assigned_to_user: problem.assigned_to
+                ? userMap[problem.assigned_to] || null
+                : null
             }));
           }
         }
       }
+
       return data || [];
     }
   });
