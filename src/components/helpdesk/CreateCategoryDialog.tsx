@@ -100,17 +100,20 @@ export const CreateCategoryDialog = ({
         if (error) throw error;
         return data;
       } else {
-        // Ensure we have tenant_id
-        if (!userProfile?.tenant_id) {
-          throw new Error("Tenant information is not configured. Please contact your administrator.");
+        // Default tenant_id to 1 for org users (standard tenant)
+        const tenantId = userProfile?.tenant_id || 1;
+        const organisationId = userProfile?.organisation_id;
+
+        if (!organisationId) {
+          throw new Error("Organisation information is not configured. Please contact your administrator.");
         }
 
-        // Check if category with same name already exists for this tenant
+        // Check if category with same name already exists for this organisation
         const { data: existing } = await supabase
           .from("helpdesk_categories")
           .select("id")
           .eq("name", values.name)
-          .eq("tenant_id", userProfile.tenant_id)
+          .eq("organisation_id", organisationId)
           .maybeSingle();
 
         if (existing) {
@@ -118,17 +121,13 @@ export const CreateCategoryDialog = ({
         }
 
         // Create new category
-        const categoryData: any = {
+        const categoryData = {
           name: values.name,
           description: values.description || null,
           is_active: true,
-          tenant_id: userProfile.tenant_id,
+          tenant_id: tenantId,
+          organisation_id: organisationId,
         };
-
-        // Add organisation_id if available
-        if (userProfile.organisation_id) {
-          categoryData.organisation_id = userProfile.organisation_id;
-        }
 
         const { data, error } = await supabase
           .from("helpdesk_categories")
